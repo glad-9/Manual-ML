@@ -20,28 +20,31 @@ def main():
     relu = Activation(reLU, reLU_deriv)
     sigmoid_activation = Activation(sigmoid, sigmoid_deriv)
 
-    layer_1 = Dense(input_size=feature_count, count=64, activation=relu)
-    layer_2 = Dense(input_size=64, count=32, activation=relu)
-    layer_3 = Dense(input_size=32, count=16, activation=relu)
-    layer_4 = Dense(input_size=16, count=8, activation=relu)
-    layer_5 = Dense(input_size=8, count=1, activation=sigmoid_activation)
+    # layer_1 = Dense(input_size=feature_count, count=64, activation=relu)
+    # layer_2 = Dense(input_size=64, count=32, activation=relu)
+    # layer_3 = Dense(input_size=32, count=16, activation=relu)
+    # layer_4 = Dense(input_size=16, count=8, activation=relu)
+    # layer_5 = Dense(input_size=8, count=1, activation=sigmoid_activation)
 
-    layers = [layer_1, layer_2, layer_3, layer_4, layer_5]
+    # layers = [layer_1, layer_2, layer_3, layer_4, layer_5]
 
-    # layer_1 = Dense(input_size = feature_count, count = 32, activation = relu)
-    # layer_2 = Dense(input_size = 32, count=16, activation=relu)
-    # layer_3 = Dense(input_size = 16, count = 8, activation=relu)
-    # layer_4 = Dense(input_size = 8, count = 1, activation=sigmoid_activation)
+    layer_1 = Dense(input_size = feature_count, count = 32, activation = relu)
+    layer_2 = Dense(input_size = 32, count=16, activation=relu)
+    layer_3 = Dense(input_size = 16, count = 8, activation=relu)
+    layer_4 = Dense(input_size = 8, count = 1, activation=sigmoid_activation)
 
-    # layers = [layer_1, layer_2, layer_3, layer_4]
+    layers = [layer_1, layer_2, layer_3, layer_4]
 
     # Cost
     loss = Loss(bce, bce_deriv)
 
     network = Network(layers, loss, X_train, y_train)
-    final_train_cost = network.train(0.01, 5000)
+    final_train_cost = network.train(0.0001, 10000)
 
-    print(f"Training Final Cost: {final_train_cost}")
+    cv_cost = network.compute_cost(X_val,y_val)[0]
+
+    print(f"Training Final Cost: {final_train_cost}\n CV Cost: {cv_cost}")
+
 
 
 if __name__ == '__main__':

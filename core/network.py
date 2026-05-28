@@ -9,17 +9,25 @@ class Network:
         self.cost_func = cost.forward # Cost/Loss function (forward attribute in Cost object)
         self.cost_deriv = cost.backward  # Cost/Loss derivative (backward attribute in Cost object)
     
-    def forward_prop(self):
-        activation = self.X
+    def forward_prop(self, X=None):
+        if X is None:
+            X = self.X
+        activation = X
         for layer in self.layers:
             activation = layer.activate(activation)
         
         return activation
 
-    def compute_cost(self):
-        y_hat = self.forward_prop()
-        cost_value = self.cost_func(y_hat, self.y) # cost
-        dA = self.cost_deriv(y_hat, self.y) # cost deriv
+    def compute_cost(self, X=None, y=None):
+        if X is None:
+            X = self.X
+        
+        if y is None:
+            y = self.y
+
+        y_hat = self.forward_prop(X)
+        cost_value = self.cost_func(y_hat, y) # cost
+        dA = self.cost_deriv(y_hat, y) # cost deriv
 
         return cost_value, dA
 
@@ -44,6 +52,6 @@ class Network:
             if i % 100 == 0:
                 print(f"Epoch: {i/100}\n Cost: {cost_history[i]}")
 
-        return np.mean(cost_history)
+        return cost_history[-1]
 
     

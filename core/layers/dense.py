@@ -7,7 +7,9 @@ class Dense:
         self.a_func = activation.forward
         self.a_deriv = activation.backward
 
-        self.W = np.random.randn(input_size, count)
+        # self.W = np.random.randn(input_size, count)
+        # He / Xavier Scaling
+        self.W = np.random.randn(input_size, count) * np.sqrt(2.0 / input_size)
         self.B = np.zeros((1, count))
 
     def activate(self, a_prev):
