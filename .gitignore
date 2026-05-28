@@ -1,0 +1,14 @@
+# Python cache
+__pycache__/
+*.pyc
+
+# Virtual env
+venv/
+.env/
+
+# Datasets (usually too large / noisy)
+datasets/
+
+# IDE
+.vscode/
+.idea/
