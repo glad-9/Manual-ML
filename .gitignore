@@ -9,6 +9,9 @@ venv/
 # Datasets (usually too large / noisy)
 datasets/
 
+# Saved Models (for now)
+saved_models/
+
 # IDE
 .vscode/
 .idea/

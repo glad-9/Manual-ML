@@ -1,29 +1,29 @@
 import numpy as np
+from .base import Layer
 
-class Dense:
+class Dense(Layer):
     def __init__(self, input_size, count, activation):
         self.input_size = input_size
         self.count = count
-        self.a_func = activation.forward
-        self.a_deriv = activation.backward
+        self.activation = activation()
 
         # self.W = np.random.randn(input_size, count)
         # He / Xavier Scaling
         self.W = np.random.randn(input_size, count) * np.sqrt(2.0 / input_size)
         self.B = np.zeros((1, count))
 
-    def activate(self, a_prev):
+    def forward(self, a_prev):
         self.a_prev = a_prev # shape: (samples, input_size)
         self.Z = self.a_prev @ self.W + self.B # (samples, count)
-        self.A = self.a_func(self.Z)
+        self.A = self.activation.forward(self.Z)
         return self.A
 
-    def compute_gradients(self, dA_back, lambda_reg=0.01):
+    def backward(self, dA_back, lambda_reg=0.01):
         # Number of examples in the current batch
         m = self.a_prev.shape[0]
 
         # Element-wise multiplication
-        self.dZ = dA_back * self.a_deriv(self.Z)  # (samples, count)
+        self.dZ = dA_back * self.activation.backward(self.Z)  # (samples, count)
         # print(dA_back.shape)
         # print(self.a_deriv(self.Z).shape)
         # print(self.dZ.shape)
