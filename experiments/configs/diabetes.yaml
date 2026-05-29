@@ -20,6 +20,11 @@ layers:
 
 training:
   lr: 0.005
-  lambda_reg: 0.05
-  iterations: 50000
+  lambda_reg: 0.01
+  optimizer: sgd
+  iterations: 10000
+  batching:
+    method: "standard"
+    batch_size: 64
+    drop_last: True
   loss: bce

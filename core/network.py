@@ -4,11 +4,13 @@ import pickle
 
 
 class Network:
-    def __init__(self, layers, cost, X, y):
+    def __init__(self, layers, cost, optimizer, batcher, X, y):
         self.X = X  # Inputs - (examples, features)
         self.y = y  # Labels - (examples, 1)
         self.layers = layers  # List of Layer objects
         self.cost = cost() # Cost object containing cost function and cost derivative
+        self.optimizer = optimizer # Pre-initialized optimizer
+        self.batcher = batcher # Pre-initialized Batcher object
 
         self.best_model_state = None
         self.best_val_cost = float('inf')
@@ -35,10 +37,10 @@ class Network:
 
         return cost_value, dA
 
-    def backward_prop(self, lambda_reg=0.01):
-        reversed_layers = reversed(self.layers)
-        cost, dA = self.compute_cost()
-        for layer in reversed_layers:
+    def backward_prop(self, X_batch, y_batch, lambda_reg=0.01):
+        cost, dA = self.compute_cost(X_batch, y_batch)
+
+        for layer in reversed(self.layers):
             dA = layer.backward(dA, lambda_reg)
 
         return cost
@@ -48,11 +50,16 @@ class Network:
         patience_counter = 0
         
         for i in range(iterations):
-            cost = self.backward_prop(lambda_reg)
-            for layer in self.layers:
-                layer.update_params(lr)
+            epoch_costs = []
 
-            train_cost_history.append(cost)
+            for X_batch, y_batch in self.batcher.get_batch(self.X, self.y):
+                batch_cost = self.backward_prop(X_batch, y_batch, lambda_reg)
+                epoch_costs.append(batch_cost)
+
+                self.optimizer.step(self.layers)
+
+            full_train_cost, _ = self.compute_cost(self.X, self.y)
+            train_cost_history.append(full_train_cost)
 
             if i % 100 == 0:
                 print(f"Epoch: {i/100}\n Train Cost: {train_cost_history[i]}")

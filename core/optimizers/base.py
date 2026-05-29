@@ -2,5 +2,5 @@ from abc import ABC, abstractmethod
 
 class Optimizer(ABC):
     @abstractmethod
-    def update(self, layer):
+    def step(self, layers):
         pass

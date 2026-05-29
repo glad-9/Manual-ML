@@ -37,9 +37,8 @@ class Dense(Layer):
 
         return self.dA_backpass
 
-    def update_params(self, lr):
-        self.W -= lr * self.dW
-        self.B -= lr * self.dB
+    def get_params_and_grads(self):
+        return [(self.W, self.dW), (self.B, self.dB)]
 
     def save_state(self):
         return {

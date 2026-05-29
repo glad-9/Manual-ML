@@ -10,7 +10,7 @@ class Layer(ABC):
         pass
 
     @abstractmethod
-    def update_params(self, optimizer):
+    def get_params_and_grads(self):
         pass
 
     @abstractmethod
@@ -18,5 +18,5 @@ class Layer(ABC):
         pass
 
     @abstractmethod
-    def load_state(self):
+    def load_state(self, state):
         pass

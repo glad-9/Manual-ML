@@ -22,7 +22,7 @@ def main():
         lr=tc["lr"],
         lambda_reg=tc["lambda_reg"],
         iterations=tc["iterations"],
-        save_path="saved_models/diabetes.pkl"
+        save_path="saved_models/diabetes.pkl",
     )
 
     results = network.evaluate(X_test, y_test)
