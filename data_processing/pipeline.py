@@ -3,19 +3,20 @@ from .train_test_split import train_test_split
 from .preprocessing import normalize
 from .features import split_features_labels, reshape_inputs
 
-def pipeline(csv_path, label):
+def pipeline(csv_path, label, train_ratio=0.6, val_ratio=0.2):
     # Load raw dataset
     raw_df = load_csv(csv_path)
 
 
     # Split dataset
-    train_df, val_df, test_df = train_test_split(raw_df)
+    train_df, val_df, test_df = train_test_split(raw_df,train_ratio=train_ratio,val_ratio=val_ratio)
 
 
     # Normalize
     train_df, [val_df, test_df] = normalize(
         train_df,
-        [val_df, test_df]
+        [val_df, test_df],
+        target_column=label
     )
     
     # Convert to features/labels

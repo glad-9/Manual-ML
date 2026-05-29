@@ -18,7 +18,7 @@ class Dense:
         self.A = self.a_func(self.Z)
         return self.A
 
-    def compute_gradients(self, dA_back):
+    def compute_gradients(self, dA_back, lambda_reg=0.01):
         # Number of examples in the current batch
         m = self.a_prev.shape[0]
 
@@ -29,7 +29,7 @@ class Dense:
         # print(self.dZ.shape)
 
         #
-        self.dW = self.a_prev.T @ self.dZ / m   # (count_prev, samples) @ (samples, count)  = (count_prev, count) AKA (input_size, count) = Shape(W)
+        self.dW = (self.a_prev.T @ self.dZ / m) + (lambda_reg / m) * self.W  # (count_prev, samples) @ (samples, count)  = (count_prev, count) AKA (input_size, count) = Shape(W)
         self.dB = np.sum(self.dZ, axis=0, keepdims=True) / m
 
         #
@@ -40,6 +40,16 @@ class Dense:
     def update_params(self, lr):
         self.W -= lr * self.dW
         self.B -= lr * self.dB
+
+    def save_state(self):
+        return {
+            "W" : self.W.copy(),
+            "B" : self.B.copy()
+        }
+
+    def load_state(self, state):
+        self.W = state["W"].copy()
+        self.B = state["B"].copy()
 
 
 

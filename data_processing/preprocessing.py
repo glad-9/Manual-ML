@@ -1,12 +1,15 @@
 import pandas as pd
 
-def normalize(train_df, other_dfs):
+def normalize(train_df, other_dfs, target_column=None):
 
     if other_dfs is None:
         other_dfs = []
 
     train_df = train_df.copy()
     numeric_columns = train_df.select_dtypes(include=['int64','float64']).columns
+
+    if target_column:
+        numeric_columns = numeric_columns.drop(target_column, errors='ignore')
 
     means = {}
     stds = {}

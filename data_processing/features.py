@@ -13,13 +13,10 @@ def split_features_labels(df, target_column):
 def reshape_inputs(X, y):
     """
     Converts shapes into neural-network format.
-
-    X: (samples, features) -> (features, samples)
-
-    Y: (samples,) -> (1, samples)
+    X: (samples, features)
+    Y: (samples,) -> (samples, 1)
     """
 
-    X = X
     y = y.reshape(-1,1)
 
     return X, y
