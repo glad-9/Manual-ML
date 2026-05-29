@@ -8,9 +8,20 @@ class Dense(Layer):
         self.activation = activation()
 
         # self.W = np.random.randn(input_size, count)
-        # He / Xavier Scaling
-        self.W = np.random.randn(input_size, count) * np.sqrt(2.0 / input_size)
-        self.B = np.zeros((1, count))
+        if activation.name == "relu":
+            # He (Kaiming) Initialization for ReLU
+            self.W = np.random.randn(input_size, count) * np.sqrt(2.0 / input_size)
+            self.B = np.full((1, count), 0.01)
+
+        elif activation.name =="sigmoid" or activation.name == "tanh":
+            # Xavier (Glorot) Normal Initialization for Sigmoid & Tanh
+            self.W = np.random.randn(input_size, count) * np.sqrt(2.0 / (input_size + count))
+            self.B = np.zeros((1, count))
+        
+        else:
+            self.W = np.random.randn(input_size, count) * np.sqrt(2.0 / (input_size))
+            self.B = np.zeros((1, count))
+
 
     def forward(self, a_prev):
         self.a_prev = a_prev # shape: (samples, input_size)
@@ -24,9 +35,6 @@ class Dense(Layer):
 
         # Element-wise multiplication
         self.dZ = dA_back * self.activation.backward(self.Z)  # (samples, count)
-        # print(dA_back.shape)
-        # print(self.a_deriv(self.Z).shape)
-        # print(self.dZ.shape)
 
         #
         self.dW = (self.a_prev.T @ self.dZ / m) + (lambda_reg / m) * self.W  # (count_prev, samples) @ (samples, count)  = (count_prev, count) AKA (input_size, count) = Shape(W)

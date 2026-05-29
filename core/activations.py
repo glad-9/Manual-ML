@@ -1,8 +1,7 @@
 import numpy as np
 
 class Linear:
-    def __init__(self):
-        self.name = "linear"
+    name = "linear"
 
     def forward(self, z):
         return z
@@ -11,8 +10,7 @@ class Linear:
         return 1
 
 class ReLU:
-    def __init__(self):
-        self.name = "relu"
+    name = "relu"
 
     def forward(self, z):
         return np.maximum(0, z)
@@ -21,8 +19,7 @@ class ReLU:
         return (z > 0).astype(float)
 
 class Sigmoid:
-    def __init__(self):
-        self.name = "sigmoid"
+    name = "sigmoid"
 
     def forward(self, z):
         return 1 / (1 + (np.exp(-z)))
