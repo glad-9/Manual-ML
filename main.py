@@ -19,7 +19,7 @@ def main():
     tc = config["training"]
     train_cost, cv_cost = network.fit(
         val_data=subsets["cv"],
-        lr=tc["lr"],
+        lr=tc["optimizer"]["lr"],
         lambda_reg=tc["lambda_reg"],
         iterations=tc["iterations"],
         save_path="saved_models/diabetes.pkl",

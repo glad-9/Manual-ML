@@ -52,11 +52,12 @@ class Network:
         for i in range(iterations):
             epoch_costs = []
 
-            for X_batch, y_batch in self.batcher.get_batch(self.X, self.y):
-                batch_cost = self.backward_prop(X_batch, y_batch, lambda_reg)
-                epoch_costs.append(batch_cost)
+            if self.batcher.enabled:
+                for X_batch, y_batch in self.batcher.get_batch(self.X, self.y):
+                    batch_cost = self.backward_prop(X_batch, y_batch, lambda_reg)
+                    epoch_costs.append(batch_cost)
 
-                self.optimizer.step(self.layers)
+                    self.optimizer.step(self.layers)
 
             full_train_cost, _ = self.compute_cost(self.X, self.y)
             train_cost_history.append(full_train_cost)

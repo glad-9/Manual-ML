@@ -1,8 +1,7 @@
 import numpy as np
 
 class BCE:
-    def __init__(self):
-        self.name = "bce"
+    name = "bce"
 
     def forward(self, y_hat, y):
         y_hat = np.clip(y_hat, 1e-15, 1-1e-15)
@@ -16,8 +15,7 @@ class BCE:
 
 
 class MSE:
-    def __init__(self):
-        self.name = "mse"
+    name = "mse"
 
     def forward(self, y_hat, y):
         self.cost = np.mean(0.5 * ((y_hat - y) ** 2))

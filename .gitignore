@@ -12,6 +12,9 @@ datasets/
 # Saved Models (for now)
 saved_models/
 
+# TODO
+TODO
+
 # IDE
 .vscode/
 .idea/

@@ -1,8 +1,8 @@
 dataset:
-  path: datasets/raw/diabetes.csv
-  label: Outcome
-  train_ratio: 0.8
-  val_ratio: 0.1
+  path: path
+  label: label
+  train_ratio: 0.6
+  val_ratio: 0.2
 
 layers:
   - type: dense
@@ -21,10 +21,11 @@ layers:
 training:
   loss: bce
   lambda_reg: 0.01
-
   optimizer: 
-    type: "momentum"
+    type: "adam"
     lr: 0.005
+    mf: 0.9
+    dr: 0.9
 
   batching:
     enabled: True

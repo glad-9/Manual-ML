@@ -8,6 +8,9 @@ from core.activations import Linear, ReLU, Sigmoid
 from core.losses import BCE, MSE
 
 from core.optimizers.sgd import SGD
+from core.optimizers.adagrad import Adagrad
+from core.optimizers.momentum import Momentum
+from core.optimizers.rmsprop import RMSprop
 from core.optimizers.adam import Adam
 
 from data_processing.batching import Batcher
@@ -26,6 +29,9 @@ LOSSES = {
 
 OPTIMIZERS = {
     "sgd": SGD,
+    "adagrad": Adagrad,
+    "momentum": Momentum,
+    "rmsprop": RMSprop,
     "adam": Adam,
 }
 
@@ -49,14 +55,18 @@ def build_network(config_path, X_train, y_train):
 
     loss = LOSSES[config["training"]["loss"]]
 
-    optimizer = OPTIMIZERS[config["training"]["optimizer"]]
-    optimizer_instance = optimizer(lr=config["training"]["lr"])
+    optimizer_cfg = config["training"].get("optimizer", {})
+    optimizer = OPTIMIZERS[optimizer_cfg.pop("type")]
+    optimizer_instance = optimizer(**optimizer_cfg)
 
     batch_cfg = config["training"].get("batching", {})
     batcher = Batcher(
         method=batch_cfg.get("method", "standard"),
         batch_size=batch_cfg.get("batch_size", 32),
-        drop_last=batch_cfg.get("drop_last", False)
+        drop_last=batch_cfg.get("drop_last", True),
+        shuffle=batch_cfg.get("shuffle", True)
     )
+    if not batch_cfg.get("enabled"):
+        batcher.enabled = False
 
     return Network(layers, loss, optimizer_instance, batcher, X_train, y_train)

@@ -1,10 +1,12 @@
 import numpy as np
 
 class Batcher:
-    def __init__(self, method="standard", batch_size=32, drop_last=False):
+    def __init__(self, method="standard", batch_size=32, drop_last=False, shuffle=True):
+        self.enabled = True
         self.method = method
         self.batch_size = batch_size
         self.drop_last = drop_last
+        self.shuffle = shuffle
 
     def get_batch(self, X, y):
         """ Dispatches data to correct batching generator"""
@@ -15,9 +17,9 @@ class Batcher:
         else:
             raise ValueError(f"Unknown batching method: {self.method}")
 
-    def _standard_batch(self, X, y, shuffle=True):
+    def _standard_batch(self, X, y):
         m = X.shape[0] # samples
-        indices = np.random.permutation(m) if shuffle else np.arange(m)
+        indices = np.random.permutation(m) if self.shuffle else np.arange(m)
 
         # Calculate stopping point depending on drop_last (set to True during training, False during CV & Test)
         end_idx = m - (m % self.batch_size) if self.drop_last else m
