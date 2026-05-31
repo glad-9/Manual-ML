@@ -1,11 +1,18 @@
 import yaml
 
-from core.layers.dense import Dense
 from core.network import Network
 
-from core.activations import Linear, ReLU, Sigmoid
+from core.initializers.he import He
+from core.initializers.xavier import Xavier
 
-from core.losses import BCE, MSE
+from core.layers.linear import Linear
+
+from core.activations.relu import ReLU
+from core.activations.sigmoid import Sigmoid
+from core.activations.tanh import Tanh
+
+from core.losses.bce import BCE
+from core.losses.mse import MSE
 
 from core.optimizers.sgd import SGD
 from core.optimizers.adagrad import Adagrad
@@ -15,11 +22,16 @@ from core.optimizers.adam import Adam
 
 from data_processing.batching import Batcher
 
+INITIALIZERS = {
+    "he": He,
+    "xavier": Xavier,
+}
 
-ACTIVATIONS = {
+LAYERS = {
     "linear": Linear,
     "relu":  ReLU,
     "sigmoid": Sigmoid,
+    "tanh": Tanh,
 }
 
 LOSSES = {
@@ -35,22 +47,29 @@ OPTIMIZERS = {
     "adam": Adam,
 }
 
-def build_network(config_path, X_train, y_train):
+def build_network(config_path, feature_count):
     with open (config_path) as f:
         config = yaml.safe_load(f)
 
-    feature_count = X_train.shape[1]
     prev_size = feature_count
 
     layers = []
     for layer_cfg in config["layers"]:
-        activation = ACTIVATIONS[layer_cfg["activation"]]
-        layer = Dense(
-            input_size=prev_size,
-            count=layer_cfg["count"],
-            activation=activation,
-        )
-        prev_size = layer_cfg["count"] # next layer's input size
+        initializer_key = layer_cfg.get("initializer", "he")
+        initializer = INITIALIZERS[initializer_key]()
+
+        layer_type = layer_cfg["type"]
+
+        if layer_type == "linear":
+            layer = LAYERS[layer_type](
+                input_size=prev_size,
+                output_size=layer_cfg["output_size"],
+                initializer=initializer
+            )
+            prev_size = layer_cfg["output_size"] # next layer's input size
+        else:
+            layer = LAYERS[layer_type]()
+
         layers.append(layer)
 
     loss = LOSSES[config["training"]["loss"]]
@@ -69,4 +88,4 @@ def build_network(config_path, X_train, y_train):
     if not batch_cfg.get("enabled"):
         batcher.enabled = False
 
-    return Network(layers, loss, optimizer_instance, batcher, X_train, y_train)
+    return Network(layers, loss, optimizer_instance, batcher)

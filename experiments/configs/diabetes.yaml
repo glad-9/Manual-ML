@@ -5,30 +5,31 @@ dataset:
   val_ratio: 0.1
 
 layers:
-  - type: dense
-    count: 32
-    activation: relu
-  - type: dense
-    count: 16
-    activation: relu
-  - type: dense
-    count: 8
-    activation: relu
-  - type: dense
-    count: 1
-    activation: sigmoid
+  - type: linear
+    output_size: 32
+  - type: relu
+  - type: linear
+    output_size: 16
+  - type: relu
+  - type: linear
+    output_size: 8
+  - type: relu
+  - type: linear
+    output_size: 1
+    initializer: xavier
+  - type: sigmoid
 
 training:
   loss: bce
-  lambda_reg: 0.01
 
   optimizer: 
-    type: "momentum"
-    lr: 0.005
+    type: sgd
+    lr: 0.01
+    reg: 0.01
 
   batching:
     enabled: True
-    method: "standard"
+    method: standard
     batch_size: 64
     drop_last: True
     shuffle: True

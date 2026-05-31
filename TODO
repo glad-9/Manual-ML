@@ -1,0 +1,26 @@
+Current Goals:
+- Batch Normalization Layer
+- Dropout Layer
+- One-hot Encoding
+- Robust Data processing
+
+
+Near-future:
+- Tensors
+- Autograd
+- Visualization Scripts
+- Test out experiments on various datasets
+
+
+Later:
+- Image processing
+- Feature Engineering
+- CNNs
+- 
+
+Finished:
+- Layer refactoring + linear/activation split
+- Regularization within optimizer
+- Initializer objects
+- Activation Layer objects
+- Linear Layer object

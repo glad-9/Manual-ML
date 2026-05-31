@@ -2,8 +2,9 @@ from .base import Optimizer
 import numpy as np
 
 class Adam(Optimizer):
-    def __init__(self, lr=0.01, mf=0.9, dr=0.9):
-        self.lr = lr
+    def __init__(self, mf=0.9, dr=0.99, **kwargs):
+        super().__init__(**kwargs)
+
         self.mf = mf # mf = momentum factor
         self.dr = dr # dr = decay rate
         self.momentum = {} # Maintains a running average of gradients
@@ -14,7 +15,10 @@ class Adam(Optimizer):
     def step(self, layers):
         self.t += 1
         for layer in layers:
-            for param, grad in layer.get_params_and_grads():
+            for param, grad, regularize in layer.get_params_and_grads():
+
+                if regularize:
+                    grad += self.reg * param
                 
                 key = id(param)
                 grad = np.clip(grad, -5, 5)

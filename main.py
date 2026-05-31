@@ -14,13 +14,14 @@ def main():
 
     X_train, y_train = subsets["train"]
     X_test, y_test = subsets["test"]
-    network = build_network(config_path, X_train, y_train)
+
+    feature_count = X_train.shape[1] # (samples, features)
+    network = build_network(config_path, feature_count)
 
     tc = config["training"]
     train_cost, cv_cost = network.fit(
+        train_data=subsets["train"],
         val_data=subsets["cv"],
-        lr=tc["optimizer"]["lr"],
-        lambda_reg=tc["lambda_reg"],
         iterations=tc["iterations"],
         save_path="saved_models/diabetes.pkl",
     )
