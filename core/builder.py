@@ -6,6 +6,8 @@ from core.initializers.he import He
 from core.initializers.xavier import Xavier
 
 from core.layers.linear import Linear
+from core.layers.dropout import Dropout
+from core.layers.batchnorm import BatchNorm
 
 from core.activations.relu import ReLU
 from core.activations.sigmoid import Sigmoid
@@ -29,6 +31,9 @@ INITIALIZERS = {
 
 LAYERS = {
     "linear": Linear,
+    "dropout": Dropout,
+    "batchnorm": BatchNorm,
+
     "relu":  ReLU,
     "sigmoid": Sigmoid,
     "tanh": Tanh,
@@ -47,6 +52,24 @@ OPTIMIZERS = {
     "adam": Adam,
 }
 
+def build_layer(layer_cfg, prev_size):
+    layer_type = layer_cfg["type"]
+
+    if layer_type == "linear":
+        initializer = INITIALIZERS[layer_cfg.get("initializer", "he")]()
+        layer = Linear(prev_size, layer_cfg["output_size"], initializer=initializer)
+        return layer, layer_cfg["output_size"]
+
+    elif layer_type == "batchnorm":
+        return BatchNorm(prev_size), prev_size
+
+    elif layer_type == "dropout":
+        return Dropout(layer_cfg["rate"]), prev_size
+
+    elif layer_type in LAYERS:
+        return LAYERS[layer_type](), prev_size
+
+
 def build_network(config_path, feature_count):
     with open (config_path) as f:
         config = yaml.safe_load(f)
@@ -55,21 +78,7 @@ def build_network(config_path, feature_count):
 
     layers = []
     for layer_cfg in config["layers"]:
-        initializer_key = layer_cfg.get("initializer", "he")
-        initializer = INITIALIZERS[initializer_key]()
-
-        layer_type = layer_cfg["type"]
-
-        if layer_type == "linear":
-            layer = LAYERS[layer_type](
-                input_size=prev_size,
-                output_size=layer_cfg["output_size"],
-                initializer=initializer
-            )
-            prev_size = layer_cfg["output_size"] # next layer's input size
-        else:
-            layer = LAYERS[layer_type]()
-
+        layer, prev_size = build_layer(layer_cfg, prev_size)
         layers.append(layer)
 
     loss = LOSSES[config["training"]["loss"]]

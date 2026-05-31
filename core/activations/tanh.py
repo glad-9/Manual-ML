@@ -1,7 +1,7 @@
 import numpy as np
-from core.layers.base import Layer
+from .base import Activation
 
-class Tanh(Layer):
+class Tanh(Activation):
 
     def forward(self, X):
         self.out = (np.exp(X) - np.exp(-X))/ (np.exp(X) + np.exp(-X))
@@ -9,12 +9,3 @@ class Tanh(Layer):
 
     def backward(self, grad):
         return grad * (1 - (self.out ** 2))
-
-    def get_params_and_grads(self):
-        return []
-
-    def save_state(self):
-        return {}
-
-    def load_state(self, state):
-        pass

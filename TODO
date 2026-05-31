@@ -1,24 +1,23 @@
 Current Goals:
-- Batch Normalization Layer
-- Dropout Layer
-- One-hot Encoding
-- Robust Data processing
+- Tensors
+- Autograd
 
 
 Near-future:
-- Tensors
-- Autograd
+- Softmax activation + Cross Entropy Loss
+- One-hot Encoding
+- Robust Data processing
 - Visualization Scripts
 - Test out experiments on various datasets
 
 
 Later:
-- Image processing
+- CNNs & Image processing
 - Feature Engineering
-- CNNs
-- 
 
 Finished:
+- Batch Normalization Layer
+- Dropout Layer
 - Layer refactoring + linear/activation split
 - Regularization within optimizer
 - Initializer objects

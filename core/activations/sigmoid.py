@@ -1,7 +1,7 @@
 import numpy as np
-from core.layers.base import Layer
+from .base import Activation
 
-class Sigmoid(Layer):
+class Sigmoid(Activation):
 
     def forward(self, X):
         self.out = 1 / (1 + (np.exp(-X)))
@@ -9,12 +9,3 @@ class Sigmoid(Layer):
 
     def backward(self, grad):
         return grad * (self.out * (1 - self.out))
-
-    def get_params_and_grads(self):
-        return []
-
-    def save_state(self):
-        return {}
-
-    def load_state(self, state):
-        pass

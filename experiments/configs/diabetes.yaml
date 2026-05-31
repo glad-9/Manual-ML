@@ -6,14 +6,23 @@ dataset:
 
 layers:
   - type: linear
+    output_size: 64
+  - type: relu
+  - type: dropout
+    rate: 0.2
+
+  - type: linear
     output_size: 32
   - type: relu
+
   - type: linear
     output_size: 16
   - type: relu
+
   - type: linear
     output_size: 8
   - type: relu
+
   - type: linear
     output_size: 1
     initializer: xavier
