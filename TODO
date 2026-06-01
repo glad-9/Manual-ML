@@ -1,14 +1,12 @@
 Current Goals:
-- Tensors
-- Autograd
+- Robust Data processing
+- Network class sophistication
+- Visualization Scripts
+- Test out experiments on various datasets
 
 
 Near-future:
 - Softmax activation + Cross Entropy Loss
-- One-hot Encoding
-- Robust Data processing
-- Visualization Scripts
-- Test out experiments on various datasets
 
 
 Later:
@@ -16,6 +14,7 @@ Later:
 - Feature Engineering
 
 Finished:
+- One-hot Encoding
 - Batch Normalization Layer
 - Dropout Layer
 - Layer refactoring + linear/activation split

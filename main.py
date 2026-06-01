@@ -1,6 +1,8 @@
 import yaml
 
-from data_processing.pipeline import pipeline
+from data_processing.tabular.tabularpipeline import TabularPipeline
+from data_processing.tabular.normalizer import Normalizer
+
 from core.builder import build_network
 
 def main():
@@ -10,7 +12,10 @@ def main():
         config = yaml.safe_load(f)
 
     dc = config["dataset"]
-    subsets = pipeline(dc["path"], dc["label"], dc["train_ratio"], dc["val_ratio"])
+    
+    pipeline = TabularPipeline(dc["path"], [Normalizer()], dc["train_ratio"], dc["val_ratio"])
+
+    subsets = pipeline.run(dc["label"])
 
     X_train, y_train = subsets["train"]
     X_test, y_test = subsets["test"]
