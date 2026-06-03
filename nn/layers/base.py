@@ -16,14 +16,6 @@ class Layer(ABC):
         pass
 
     @abstractmethod
-    def backward(self, grad):
-        pass
-
-    @abstractmethod
-    def get_params_and_grads(self):
-        return []
-
-    @abstractmethod
     def save_state(self):
         return {}
 

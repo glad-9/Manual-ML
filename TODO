@@ -1,4 +1,6 @@
 Current Goals:
+- Tensors
+- Autograd
 - Robust Data processing
 - Network class sophistication
 - Visualization Scripts

@@ -1,4 +1,5 @@
 import numpy as np
+from core.tensor import Tensor
 from abc import ABC, abstractmethod
 
 class Dataset(ABC):
@@ -10,8 +11,14 @@ class Dataset(ABC):
     def __getitem__(self, idx):
         pass
 
+    def apply_transforms(self, x):
+        for t in self.transforms:
+            x = t(x)
+        return x
+
 class Subset(Dataset):
     def __init__(self, dataset, indices):
+        super().__init__()
         self.dataset = dataset
         self.indices = indices
 
@@ -32,12 +39,8 @@ class Transformer(ABC):
         pass
 
     @abstractmethod
-    def transform(self, X):
+    def __call__(self, x):
         pass
-
-    def fit_transform(self, X):
-        self.fit(X)
-        return self.transform(X)
 
 
 class Pipeline(ABC):

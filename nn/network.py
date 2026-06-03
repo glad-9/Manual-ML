@@ -2,13 +2,14 @@ import numpy as np
 import os
 import pickle
 
-from core.layers.base import Layer
+from nn.layers.base import Layer
+from core.tensor import Tensor
 
 
 class Network:
-    def __init__(self, layers, cost, optimizer, batcher):
+    def __init__(self, layers, loss, optimizer, batcher):
         self.layers = layers  # List of Layer objects
-        self.cost = cost() # Cost object containing cost function and cost derivative
+        self.loss = loss() # Loss object containing cost function and cost derivative
         self.optimizer = optimizer # Pre-initialized optimizer
         self.batcher = batcher # Pre-initialized Batcher object
 
@@ -17,14 +18,6 @@ class Network:
 
     def set_training_mode(self, mode:bool):
         Layer.set_training(mode)
-
-        # if not self.layers:
-        #     return
-
-        # for cls in type(self.layers[0]).__mro__:
-        #     if cls.__name__=="Layer":
-        #         cls.set_training(mode)
-        #         break
     
     def forward_prop(self, X):
         activation = X
@@ -33,20 +26,19 @@ class Network:
         
         return activation
 
-    def compute_cost(self, X, y):
+    def compute_loss(self, X, y):
+        y = y if isinstance(y, Tensor) else Tensor(y)
         y_hat = self.forward_prop(X)
-        cost_value = self.cost.forward(y_hat, y) # cost
-        grad = self.cost.backward(y_hat, y) # cost deriv
-
-        return cost_value, grad
+        
+        return self.loss.forward(y_hat, y)
+        
 
     def backward_prop(self, X_batch, y_batch):
-        cost, grad = self.compute_cost(X_batch, y_batch)
-
-        for layer in reversed(self.layers):
-            grad = layer.backward(grad)
-
-        return cost
+        loss = self.compute_loss(X_batch, y_batch)
+        print(loss.data)
+        loss.backward()
+        
+        return loss.data
 
     def fit(self, train_data, iterations=10000, patience=20, val_data=None, save_path=None):
         Layer.set_training(True)
@@ -70,7 +62,7 @@ class Network:
             
             self.set_training_mode(False)
 
-            full_train_cost, _ = self.compute_cost(X_train, y_train)
+            full_train_cost = self.compute_loss(X_train, y_train).data
             train_cost_history.append(full_train_cost)
 
             if i % 100 == 0:
@@ -78,7 +70,7 @@ class Network:
 
                 if val_data is not None:
                     X_val, y_val = val_data
-                    val_cost = self.compute_cost(X_val, y_val)[0]
+                    val_cost = self.compute_loss(X_val, y_val)
                     print(f" Val Cost: {val_cost}")
 
                     if val_cost < self.best_val_cost:
@@ -130,7 +122,7 @@ class Network:
 
     def evaluate(self, X, y):
         self.set_training_mode(False)
-        cost, _ = self.compute_cost(X, y)
+        cost, _ = self.compute_loss(X, y)
         y_hat = self.predict(X)
         accuracy = np.mean((y_hat >= 0.5) == y)
         return {"cost": cost, "accuracy": accuracy}

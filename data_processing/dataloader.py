@@ -1,6 +1,6 @@
 import numpy as np
 
-class Batcher:
+class DataLoader:
     def __init__(self, method="standard", batch_size=32, drop_last=False, shuffle=True):
         self.enabled = True
         self.method = method
@@ -18,7 +18,7 @@ class Batcher:
             raise ValueError(f"Unknown batching method: {self.method}")
 
     def _standard_batch(self, X, y):
-        m = X.shape[0] # samples
+        m = X.shape()[0] # samples
         indices = np.random.permutation(m) if self.shuffle else np.arange(m)
 
         # Calculate stopping point depending on drop_last (set to True during training, False during CV & Test)

@@ -1,28 +1,28 @@
 import yaml
 
-from core.network import Network
+from nn.network import Network
 
-from core.initializers.he import He
-from core.initializers.xavier import Xavier
+from nn.initializers.he import He
+from nn.initializers.xavier import Xavier
 
-from core.layers.linear import Linear
-from core.layers.dropout import Dropout
-from core.layers.batchnorm import BatchNorm
+from nn.layers.linear import Linear
+from nn.layers.dropout import Dropout
+from nn.layers.batchnorm import BatchNorm
 
-from core.activations.relu import ReLU
-from core.activations.sigmoid import Sigmoid
-from core.activations.tanh import Tanh
+from nn.activations.relu import ReLU
+from nn.activations.sigmoid import Sigmoid
+from nn.activations.tanh import Tanh
 
-from core.losses.bce import BCE
-from core.losses.mse import MSE
+from nn.loss.bce import BCE
+from nn.loss.mse import MSE
 
-from core.optimizers.sgd import SGD
-from core.optimizers.adagrad import Adagrad
-from core.optimizers.momentum import Momentum
-from core.optimizers.rmsprop import RMSprop
-from core.optimizers.adam import Adam
+from nn.optim.sgd import SGD
+from nn.optim.adagrad import Adagrad
+from nn.optim.momentum import Momentum
+from nn.optim.rmsprop import RMSprop
+from nn.optim.adam import Adam
 
-from data_processing.batching import Batcher
+from data_processing.dataloader import DataLoader
 
 INITIALIZERS = {
     "he": He,
@@ -88,7 +88,7 @@ def build_network(config_path, feature_count):
     optimizer_instance = optimizer(**optimizer_cfg)
 
     batch_cfg = config["training"].get("batching", {})
-    batcher = Batcher(
+    dataloader = DataLoader(
         method=batch_cfg.get("method", "standard"),
         batch_size=batch_cfg.get("batch_size", 32),
         drop_last=batch_cfg.get("drop_last", True),
@@ -97,4 +97,4 @@ def build_network(config_path, feature_count):
     if not batch_cfg.get("enabled"):
         batcher.enabled = False
 
-    return Network(layers, loss, optimizer_instance, batcher)
+    return Network(layers, loss, optimizer_instance, dataloader)

@@ -7,7 +7,7 @@ class Dropout(Layer):
 
     def forward(self, X):
         if self.is_training():
-            self.mask = np.random.randn(*X.shape) > self.rate
+            self.mask = np.random.randn(*X.shape()) > self.rate
             return X * self.mask / (1 - self.rate)
         return X
 

@@ -2,19 +2,26 @@ import numpy as np
 from data_processing.base import Dataset
 
 class TabularDataset(Dataset):
-    def __init__(self, df, target_column, drop_columns=None):
-        self.df = df
-        if drop_columns:
-            self.df = self.df.drop(columns=drop_columns)
-                
-        self.X = self.df.drop(columns=[target_column]).to_numpy()
-        self.y = df[target_column].to_numpy()
-
+    def __init__(self, X, y, transforms=None):
+        super().__init__()
+        self.X = X.astype(np.float32)
+        self.y = y.astype(np.float32)
+        self.transforms = transforms or []
+ 
     def __len__(self):
-        return len(self.df)
-
+        return len(self.y)
+ 
     def __getitem__(self, idx):
-        return self.X[idx], self.y[idx]
-
+        x = self.X[idx]
+        x = self.apply_transforms(x)
+        return x, self.y[idx]
+ 
     def get_all(self):
-        return self.X, self.y
+        samples = [self[i] for i in range(len(self))]
+        X = np.stack([s[0] for s in samples])
+        y = np.stack([s[1] for s in samples])
+        return X, y
+ 
+    @property
+    def n_features(self):
+        return self.X.shape[1]
