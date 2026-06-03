@@ -27,8 +27,8 @@ class Linear(Layer):
         }
 
     def load_state(self, state):
-        self.W  = state["W"].copy()
-        self.B  = state["B"].copy()
+        self.W  = Tensor(state["W"].copy(), requires_grad=True)
+        self.B  = Tensor(state["B"].copy(), requires_grad=True)
 
 
 

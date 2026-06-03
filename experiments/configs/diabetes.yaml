@@ -8,21 +8,17 @@ dataset:
   normalize: True
 
 layers:
-  - type: linear
-    output_size: 8
-  - type: relu
-
   # - type: linear
   #   output_size: 32
   # - type: relu
 
-  # - type: linear
-  #   output_size: 16
-  # - type: relu
+  - type: linear
+    output_size: 16
+  - type: relu
 
-  # - type: linear
-  #   output_size: 8
-  # - type: relu
+  - type: linear
+    output_size: 8
+  - type: relu
 
   - type: linear
     output_size: 1
@@ -34,7 +30,7 @@ training:
 
   optimizer: 
     type: sgd
-    lr: 0.01
+    lr: 0.005
     reg: 0.01
 
   batching:

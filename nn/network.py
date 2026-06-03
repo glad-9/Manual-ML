@@ -35,7 +35,6 @@ class Network:
 
     def backward_prop(self, X_batch, y_batch):
         loss = self.compute_loss(X_batch, y_batch)
-        print(loss.data)
         loss.backward()
         
         return loss.data
@@ -70,7 +69,7 @@ class Network:
 
                 if val_data is not None:
                     X_val, y_val = val_data
-                    val_cost = self.compute_loss(X_val, y_val)
+                    val_cost = self.compute_loss(X_val, y_val).data
                     print(f" Val Cost: {val_cost}")
 
                     if val_cost < self.best_val_cost:
@@ -122,8 +121,8 @@ class Network:
 
     def evaluate(self, X, y):
         self.set_training_mode(False)
-        cost, _ = self.compute_loss(X, y)
+        loss = self.compute_loss(X, y).data
         y_hat = self.predict(X)
-        accuracy = np.mean((y_hat >= 0.5) == y)
-        return {"cost": cost, "accuracy": accuracy}
+        accuracy = np.mean((y_hat.data >= 0.5) == y.data)
+        return {"loss": loss, "accuracy": accuracy}
     

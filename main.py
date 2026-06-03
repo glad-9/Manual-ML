@@ -48,7 +48,7 @@ def main():
 
     results = network.evaluate(X_test, y_test)
     print(f"---------------------------\nFinal Costs:\nFinal Train Cost: {train_cost}\nFinal CV Cost: {cv_cost}")
-    print(f"---------------------------\nTest Set Results:\nTest Cost: {results["cost"]}\nTest Accuracy: {results["accuracy"]}")
+    print(f"---------------------------\nTest Set Results:\nTest Cost: {results["loss"]}\nTest Accuracy: {results["accuracy"]}")
 
 
 if __name__ == '__main__':
