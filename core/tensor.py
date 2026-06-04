@@ -179,7 +179,7 @@ class Tensor:
         return out
 
     def sum(self):
-        op = np.sum(self.data)
+        op = np.sum(self.data) if axis is None else np.sum(self.data, axis=axis, keepdims=True)
         out = self._create_results(op, self)
         out.op = 'sum'
 
@@ -213,8 +213,17 @@ class Tensor:
     def tanh(self):
         return (self.exp() - (-self).exp()) / (self.exp() + (-self).exp())
 
+    def softmax(self):
+        shifted = self - self.data.max(axis=1, keepdims=True)
+        exp = shifted.exp()
+        return exp / exp.sum(axis=1)
+
     def bce(self, y):
         return -(y * self.log() + (Tensor(1.0) - y) * (Tensor(1.0) - self).log()).mean()
 
     def mse(self, y):
         return (Tensor(0.5) * ((self - y) ** 2)).mean()
+
+    def ce(self, y):
+        return -(y * self.log()).sum(axis=1).mean()
+

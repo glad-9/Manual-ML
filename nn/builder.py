@@ -37,11 +37,13 @@ LAYERS = {
     "relu":  ReLU,
     "sigmoid": Sigmoid,
     "tanh": Tanh,
+    "softmax": Softmax,
 }
 
 LOSSES = {
     "mse":MSE,
     "bce":BCE,
+    "ce": CE,
 }
 
 OPTIMIZERS = {

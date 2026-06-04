@@ -6,14 +6,14 @@ Current Goals:
 
 
 Near-future:
-- Softmax activation + Cross Entropy Loss
+- CNNs & Image processing
 
 
 Later:
-- CNNs & Image processing
 - Feature Engineering
 
 Finished:
+- Softmax activation + Cross Entropy Loss
 - Refactor code to match Tensor API
 - Change it so that batching receives numpy arrays and dynamically converts yielded batches into tensors
 - Tensors
