@@ -7,12 +7,12 @@ class SGD(Optimizer):
 
     def step(self, layers):
         for layer in layers:
-            for p, regularize in layer.get_params():
-                if regularize:
+            for p in layer.get_params():
+                if p.requires_reg:
                     p.grad += self.reg * p.data
 
                 p.data -= self.lr * p.grad
-                p.grad = np.zeros_like(p.data)
+                p.grad = None
 
                 
 

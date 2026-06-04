@@ -10,25 +10,25 @@ class Linear(Layer):
 
         self.shape = (input_size, output_size)
         
-        self.W = Tensor(initializer.initialize(self.shape), requires_grad=True)
-        self.B = Tensor(np.zeros((1, output_size)), requires_grad=True)
+        self.W = Tensor(initializer.initialize(self.shape), requires_grad=True, requires_reg=True)
+        self.b = Tensor(np.zeros((1, output_size)), requires_grad=True)
 
     def forward(self, X):
         X = X if isinstance(X, Tensor) else Tensor(X)
-        return X @ self.W + self.B
+        return X @ self.W + self.b
 
     def get_params(self):
-        return [(self.W, True), (self.B, False)]
+        return [self.W, self.b]
 
     def save_state(self):
         return {
             "W" : self.W.data.copy(),
-            "B" : self.B.data.copy()
+            "b" : self.b.data.copy()
         }
 
     def load_state(self, state):
         self.W  = Tensor(state["W"].copy(), requires_grad=True)
-        self.B  = Tensor(state["B"].copy(), requires_grad=True)
+        self.B  = Tensor(state["b"].copy(), requires_grad=True)
 
 
 

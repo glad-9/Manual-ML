@@ -10,23 +10,24 @@ class Momentum(Optimizer):
 
     def step(self, layers):
         for layer in layers:
-            for param, grad, regularize in layer.get_params_and_grads():
-                key = id(param)
+            for p in layers.get_params():
+                key = id(p)
 
-                if regularize:
-                    grad += self.reg * param
+                if p.requires_reg:
+                    p.grad += self.reg * p.data
 
-                grad = np.clip(grad, -5, 5)
+                grad = np.clip(p.grad, -5, 5)
 
                 if key not in self.momentum:
-                    self.momentum[key] = np.zeros_like(param)
+                    self.momentum[key] = np.zeros_like(p.data)
 
                 m_prev = self.momentum[key]
 
                 m_next = (self.mf * m_prev) + (1 - self.mf) * grad
 
                 self.momentum[key] = m_next
-                param[:] -= self.lr * m_next
+                p.data -= self.lr * m_next
+                p.grad = None
 
 
                 

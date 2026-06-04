@@ -1,13 +1,19 @@
 dataset:
-  path: datasets/raw/diabetes.csv
-  label: Outcome
-  categorical: []
-  drop: []
+  path: datasets/raw/housing_prices.csv
+  label: price
+  categorical: [bedrooms, bathrooms, floors, condition, city]
+  drop: [date, street, country, statezip, yr_built, yr_renovated]
   train_ratio: 0.8
   val_ratio: 0.1
   normalize: True
 
 layers:
+  - type: linear
+    output_size: 128
+  - type: relu
+  - type: dropout
+    rate: 0.2
+
   - type: linear
     output_size: 64
   - type: relu
@@ -25,22 +31,20 @@ layers:
 
   - type: linear
     output_size: 1
-    initializer: xavier
-  - type: sigmoid
+  - type: relu
 
 training:
-  loss: bce
+  loss: mse
+  iterations: 10000
 
   optimizer: 
     type: adam
-    lr: 0.01
+    lr: 0.005
     reg: 0.01
 
   batching:
     enabled: True
     method: standard
-    batch_size: 64
+    batch_size: 256
     drop_last: True
     shuffle: True
-
-  iterations: 10000

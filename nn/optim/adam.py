@@ -15,18 +15,18 @@ class Adam(Optimizer):
     def step(self, layers):
         self.t += 1
         for layer in layers:
-            for param, grad, regularize in layer.get_params_and_grads():
+            for p in layer.get_params():
 
-                if regularize:
-                    grad += self.reg * param
+                if p.requires_reg:
+                    p.grad += self.reg * p.data
                 
-                key = id(param)
-                grad = np.clip(grad, -5, 5)
+                key = id(p)
+                grad = np.clip(p.grad, -5, 5)
 
                 # First moment estimate
 
                 if key not in self.momentum:
-                    self.momentum[key] = np.zeros_like(param)
+                    self.momentum[key] = np.zeros_like(p.data)
 
                 m_prev = self.momentum[key]
 
@@ -36,7 +36,7 @@ class Adam(Optimizer):
 
                 # Second moment estimate
                 if key not in self.velocity:
-                    self.velocity[key] = np.zeros_like(param)
+                    self.velocity[key] = np.zeros_like(p.data)
 
                 v_prev = self.velocity[key]
 
@@ -48,5 +48,6 @@ class Adam(Optimizer):
                 m_corrected = m_raw/(1 - self.mf ** self.t)
                 v_corrected = v_raw/(1 - self.dr ** self.t)
 
-                param[:] -= ((self.lr * m_corrected)/(np.sqrt(v_corrected) + self.epsilon))
+                p.data -= ((self.lr * m_corrected)/(np.sqrt(v_corrected) + self.epsilon))
+                p.grad = None
             

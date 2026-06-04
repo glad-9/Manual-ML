@@ -1,7 +1,8 @@
 import numpy as np
+from core.tensor import Tensor
 
 class DataLoader:
-    def __init__(self, method="standard", batch_size=32, drop_last=False, shuffle=True):
+    def __init__(self, method="standard", batch_size=64, drop_last=False, shuffle=True):
         self.enabled = True
         self.method = method
         self.batch_size = batch_size
@@ -18,7 +19,7 @@ class DataLoader:
             raise ValueError(f"Unknown batching method: {self.method}")
 
     def _standard_batch(self, X, y):
-        m = X.shape()[0] # samples
+        m = X.shape[0] # samples
         indices = np.random.permutation(m) if self.shuffle else np.arange(m)
 
         # Calculate stopping point depending on drop_last (set to True during training, False during CV & Test)
@@ -26,7 +27,7 @@ class DataLoader:
 
         for i in range(0, end_idx, self.batch_size):
             batch_indices = indices[i:i+self.batch_size]
-            yield X[batch_indices], y[batch_indices]
+            yield Tensor(X[batch_indices]), Tensor(y[batch_indices])
 
     def _stratified_batch(self, X, y):
         pass

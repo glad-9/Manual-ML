@@ -5,7 +5,7 @@ from core.tensor import Tensor
 from nn.builder import build_network
 
 def main():
-    config_path = "experiments/configs/diabetes.yaml"
+    config_path = "experiments/configs/housing_prices.yaml"
 
     with open(config_path) as f:
         config = yaml.safe_load(f)
@@ -29,25 +29,18 @@ def main():
     X_test, y_test = subsets["test"].get_all()
 
     feature_count = X_train.shape[1] # (samples, features)
-    network = build_network(config_path, feature_count)
-
-    X_train = Tensor(X_train)
-    y_train = Tensor(y_train.reshape(-1,1))
-    X_val = Tensor(X_val)
-    y_val = Tensor(y_val.reshape(-1,1))
-    X_test = Tensor(X_test)
-    y_test = Tensor(y_test.reshape(-1,1))
+    model = build_network(config_path, feature_count)
 
     tc = config["training"]
-    train_cost, cv_cost = network.fit(
+    train_cost, cv_cost = model.fit(
         train_data=(X_train, y_train),
         val_data=(X_val, y_val),
         iterations=tc["iterations"],
         save_path="saved_models/diabetes.pkl",
     )
 
-    results = network.evaluate(X_test, y_test)
-    print(f"---------------------------\nFinal Costs:\nFinal Train Cost: {train_cost}\nFinal CV Cost: {cv_cost}")
+    results = model.evaluate(X_test, y_test)
+    print(f"---------------------------\nFinal Costs:\nFinal Train Cost: {train_cost[-1]}\nFinal Best CV Cost: {model.best_val_loss}")
     print(f"---------------------------\nTest Set Results:\nTest Cost: {results["loss"]}\nTest Accuracy: {results["accuracy"]}")
 
 

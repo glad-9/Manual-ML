@@ -11,19 +11,20 @@ class RMSprop(Optimizer):
 
     def step(self, layers):
         for layer in layers:
-            for param, grad, regularize in layer.get_params_and_grads():
-                key = id(param)
-                if regularize:
-                    grad += self.reg * param
+            for p in layer.get_params():
+                key = id(p)
+                if p.requires_reg:
+                    p.grad += self.reg * p.data
 
-                grad = np.clip(grad, -5, 5)
+                grad = np.clip(p.grad, -5, 5)
 
                 if key not in self.sq_grads:
-                    self.sq_grads[key] = np.zeros_like(param)
+                    self.sq_grads[key] = np.zeros_like(p.data)
 
                 v_prev = self.sq_grads[key]
 
                 v_next = (self.dr * v_prev) + (1 - self.dr) * (grad ** 2)
 
                 self.sq_grads[key] = v_next
-                param[:] -= ((self.lr * grad)/np.sqrt(v_next + self.epsilon))
+                p.data -= ((self.lr * grad)/np.sqrt(v_next + self.epsilon))
+                p.grad = None

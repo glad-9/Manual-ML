@@ -1,10 +1,11 @@
 import numpy as np
 
 class Tensor:
-    def __init__(self, data, requires_grad=False):
+    def __init__(self, data, requires_grad=False, requires_reg=False):
         self.data = data
         self.grad = None
         self.requires_grad = requires_grad
+        self.requires_reg = requires_reg
 
         self._backward = lambda: None
         self._prev = set()
@@ -50,7 +51,7 @@ class Tensor:
         grad = self._unbroadcast(grad, self.data.shape)
         
         if self.grad is None:
-            self.grad = np.zeros_like(self.data).astype('float64')
+            self.grad = np.zeros_like(self.data).astype('float32')
 
         self.grad += grad
         assert self.grad.shape == self.data.shape
@@ -136,11 +137,11 @@ class Tensor:
 
     def __truediv__(self, other):
         other = other if isinstance(other, Tensor) else Tensor(np.array(other))
-        return self * (other ** -1)
+        return self * (other ** -1.)
 
     def __rtruediv__(self, other):
         other = other if isinstance(other, Tensor) else Tensor(np.array(other))
-        return other * (self ** -1)
+        return other * (self ** -1.)
 
     def __sub__(self, other):
         return self + (-other)
@@ -150,32 +151,10 @@ class Tensor:
         return other + (-self)
 
     def __neg__(self):
-        return self * -1
+        return self * -1.
 
-
-    def sum(self):
-        op = np.sum(self.data, axis=0, keepdims=True)
-        out = self._create_results(op, self)
-        out.op = 'sum'
-
-        def _backward():
-            self._accumulate_grad(np.ones_like(self.data) * out.grad)
-
-        out._backward = _backward
-        return out
-
-    def mean(self):
-        m = self.data.size
-        op = np.mean(self.data, axis=0, keepdims=True)
-        out = self._create_results(op, self)
-        out.op = 'mean'
-
-        def _backward():
-            # print(f"mean: out id={id(out)}, out.grad={out.grad}")
-            self._accumulate_grad((1.0 / m) * np.ones_like(self.data) * out.grad)
-
-        out._backward = _backward
-        return out
+    def sqrt(self):
+        return self ** 0.5
 
     def log(self):
         op = np.log(self.data)
@@ -199,6 +178,25 @@ class Tensor:
         out._backward = _backward
         return out
 
+    def sum(self):
+        op = np.sum(self.data)
+        out = self._create_results(op, self)
+        out.op = 'sum'
+
+        def _backward():
+            self._accumulate_grad(np.ones_like(self.data) * out.grad)
+
+        out._backward = _backward
+        return out
+
+    def mean(self):
+        n = self.data.size
+        return self.sum() / n
+
+    def var(self):
+        mean = self.mean()
+        return ((self - mean) ** 2).mean()
+
     def relu(self):
         op = np.maximum(0, self.data)
         out = self._create_results(op, self)
@@ -217,3 +215,6 @@ class Tensor:
 
     def bce(self, y):
         return -(y * self.log() + (Tensor(1.0) - y) * (Tensor(1.0) - self).log()).mean()
+
+    def mse(self, y):
+        return (Tensor(0.5) * ((self - y) ** 2)).mean()

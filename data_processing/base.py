@@ -31,7 +31,7 @@ class Subset(Dataset):
     def get_all(self):
         X = np.stack([self.dataset[i][0] for i in self.indices])
         y = np.stack([self.dataset[i][1] for i in self.indices])
-        return X, y
+        return X, y.reshape(-1,1)
 
 class Transformer(ABC):
     @abstractmethod

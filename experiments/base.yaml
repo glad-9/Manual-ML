@@ -1,6 +1,6 @@
 dataset:
-  path: datasets/raw/diabetes.csv
-  label: Outcome
+  path: path
+  label: label
   categorical: []
   drop: []
   train_ratio: 0.8

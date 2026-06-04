@@ -11,7 +11,10 @@ class Dropout(Layer):
             return X * self.mask / (1 - self.rate)
         return X
 
-    def get_params(self):
+    def backward(self, grad):
+        return grad * self.mask / (1 - self.rate)
+
+    def get_params_and_grads(self):
         return []
 
     def save_state(self):

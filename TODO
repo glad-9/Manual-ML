@@ -1,8 +1,6 @@
 Current Goals:
-- Tensors
-- Autograd
+- Fix non-converging gradient descent
 - Robust Data processing
-- Network class sophistication
 - Visualization Scripts
 - Test out experiments on various datasets
 
@@ -16,6 +14,10 @@ Later:
 - Feature Engineering
 
 Finished:
+- Refactor code to match Tensor API
+- Change it so that batching receives numpy arrays and dynamically converts yielded batches into tensors
+- Tensors
+- Autograd
 - One-hot Encoding
 - Batch Normalization Layer
 - Dropout Layer

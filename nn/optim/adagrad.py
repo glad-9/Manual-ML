@@ -10,15 +10,16 @@ class Adagrad(Optimizer):
 
     def step(self, layers):
         for layer in layers:
-            for param, grad, regularize in layer.get_params_and_grads():
-                key = id(param)
-                if regularize:
-                    grad += self.reg * param
+            for p in layers.get_params():
+                key = id(p)
+                if p.requires_reg:
+                    p.grad += self.reg * p.data
 
-                grad = np.clip(grad, -5, 5)
+                grad = np.clip(p.grad, -5, 5)
 
                 if key not in self.sq_grads:
-                    self.sq_grads[key] = np.zeros_like(param)
+                    self.sq_grads[key] = np.zeros_like(p.data)
 
                 self.sq_grads[key] += grad ** 2
-                param[:] -= ((self.lr * grad)/np.sqrt(self.sq_grads[key] + self.epsilon))
+                p.data -= ((self.lr * grad)/np.sqrt(self.sq_grads[key] + self.epsilon))
+                p.grad = None

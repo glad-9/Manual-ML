@@ -95,6 +95,6 @@ def build_network(config_path, feature_count):
         shuffle=batch_cfg.get("shuffle", True)
     )
     if not batch_cfg.get("enabled"):
-        batcher.enabled = False
+        dataloader.enabled = False
 
     return Network(layers, loss, optimizer_instance, dataloader)
