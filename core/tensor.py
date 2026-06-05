@@ -23,19 +23,13 @@ class Tensor:
                     build_topo(parent)
 
                 topo.append(node)
-                # print(
-                #     f"id={id(node)} "
-                #     f"op={node.op} "
-                #     f"shape={node.data.shape if hasattr(node.data, 'shape') else node.data}"
-                # )
-        
+
         build_topo(self)
         self.grad = np.ones_like(self.data)
         for node in reversed(topo):
             if not node.requires_grad:
                 continue
 
-            # print(f"calling backward on id: {id(node)}, shape: {node.data.shape if hasattr(node.data, 'shape') else node.data}, requires_grad: {node.requires_grad}")
             node._backward()
 
     def shape(self):
@@ -94,7 +88,6 @@ class Tensor:
         out.op = 'mul'
 
         def _backward():
-            # print(f"mul: out id={id(out)}, out.grad={out.grad.shape if hasattr(out.grad, 'shape') else out.grad}")
             self._accumulate_grad(other.data * out.grad)
             other._accumulate_grad(self.data * out.grad)
 
@@ -153,9 +146,6 @@ class Tensor:
     def __neg__(self):
         return self * -1.
 
-    def sqrt(self):
-        return self ** 0.5
-
     def log(self):
         op = np.log(self.data)
         out = self._create_results(op, self)
@@ -178,7 +168,7 @@ class Tensor:
         out._backward = _backward
         return out
 
-    def sum(self):
+    def sum(self, axis=None):
         op = np.sum(self.data) if axis is None else np.sum(self.data, axis=axis, keepdims=True)
         out = self._create_results(op, self)
         out.op = 'sum'

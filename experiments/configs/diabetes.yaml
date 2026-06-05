@@ -9,19 +9,16 @@ dataset:
 
 layers:
   - type: linear
-    output_size: 64
-  - type: relu
-  - type: dropout
-    rate: 0.1
-
-  - type: linear
-    output_size: 32
-  # - type: batchnorm
-  - type: relu
-
-  - type: linear
     output_size: 16
   - type: relu
+  - type: dropout
+    rate: 0.4
+
+  - type: linear
+    output_size: 8
+  - type: relu
+  - type: dropout
+    rate: 0.2
 
   - type: linear
     output_size: 1
@@ -33,13 +30,13 @@ training:
 
   optimizer: 
     type: adam
-    lr: 0.01
-    reg: 0.01
+    lr: 0.003
+    reg: 0.0001
 
   batching:
-    enabled: True
+    enabled: False
     method: standard
-    batch_size: 64
+    batch_size: 128
     drop_last: True
     shuffle: True
 

@@ -12,9 +12,11 @@ from nn.layers.batchnorm import BatchNorm
 from nn.activations.relu import ReLU
 from nn.activations.sigmoid import Sigmoid
 from nn.activations.tanh import Tanh
+from nn.activations.softmax import Softmax
 
 from nn.loss.bce import BCE
 from nn.loss.mse import MSE
+from nn.loss.ce import CE
 
 from nn.optim.sgd import SGD
 from nn.optim.adagrad import Adagrad

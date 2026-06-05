@@ -1,11 +1,14 @@
 import yaml
 
 from data_processing.tabular.tabularpipeline import TabularPipeline
+from viz.training import plot_loss
+from viz.evaluation import plot_confusion_matrix
+
 from core.tensor import Tensor
 from nn.builder import build_network
 
 def main():
-    config_path = "experiments/configs/housing_prices.yaml"
+    config_path = "experiments/configs/diabetes.yaml"
 
     with open(config_path) as f:
         config = yaml.safe_load(f)
@@ -36,13 +39,15 @@ def main():
         train_data=(X_train, y_train),
         val_data=(X_val, y_val),
         iterations=tc["iterations"],
-        save_path="saved_models/diabetes.pkl",
     )
 
-    results = model.evaluate(X_test, y_test)
+    results, y_hat, y_true = model.evaluate(X_test, y_test)
     print(f"---------------------------\nFinal Costs:\nFinal Train Cost: {train_cost[-1]}\nFinal Best CV Cost: {model.best_val_loss}")
     print(f"---------------------------\nTest Set Results:\nTest Cost: {results["loss"]}\nTest Accuracy: {results["accuracy"]}")
 
+    plot_confusion_matrix(y_hat, y_true)
+
+    plot_loss(train_cost, cv_cost)
 
 if __name__ == '__main__':
     main()

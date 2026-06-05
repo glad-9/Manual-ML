@@ -66,13 +66,13 @@ class Network:
                 total_train_loss = self.compute_loss(X_train, y_train).data
                 train_history.append(total_train_loss)
 
-                print(f"Epoch: {i/100}\nFull Batch Train Cost: {total_train_loss}\nBatch Train Cost: {epoch_loss[-1]}")
+                print(f"Epoch: {i/100}\nFull Batch Train Cost: {total_train_loss}\nBatch Train Cost: {epoch_loss[-1] if len(epoch_loss) != 0 else "NA"}")
 
                 if val_data is not None:
                     X_val, y_val = val_data
                     total_val_loss = self.compute_loss(X_val, y_val).data
                     val_history.append(total_val_loss)
-                    print(f" Val Cost: {total_val_loss}")
+                    print(f"Val Cost: {total_val_loss}")
 
                     if total_val_loss < self.best_val_loss:
                         self.best_val_loss = total_val_loss
@@ -126,5 +126,5 @@ class Network:
         loss = self.compute_loss(X, y).data
         y_hat = self.predict(X)
         accuracy = np.mean((y_hat.data >= 0.5) == y.data)
-        return {"loss": loss, "accuracy": accuracy}
+        return {"loss": loss, "accuracy": accuracy}, y_hat, y
     
