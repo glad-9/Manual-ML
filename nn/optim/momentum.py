@@ -10,7 +10,7 @@ class Momentum(Optimizer):
 
     def step(self, layers):
         for layer in layers:
-            for p in layers.get_params():
+            for p in layer.get_params():
                 key = id(p)
 
                 if p.requires_reg:
@@ -27,7 +27,7 @@ class Momentum(Optimizer):
 
                 self.momentum[key] = m_next
                 p.data -= self.lr * m_next
-                p.grad = None
+                p.zero_grad()
 
 
                 

@@ -39,7 +39,13 @@ class TabularPipeline(Pipeline):
             encoder = Encoder(self.categorical_columns)
             encoder.fit(df.drop(columns=[self.target_column]))
             df = encoder.transform_df(df)
- 
+
+        label_vals = sorted(df[self.target_column].unique())
+        if not set(label_vals).issubset({0, 1, 0.0, 1.0}):
+            df[self.target_column] = df[self.target_column].map(
+                {label_vals[0]: 0.0, label_vals[1]: 1.0}
+            )
+
         # 3. convert to numpy and build dataset
         target = df[self.target_column].to_numpy(dtype=np.float32)
         features = df.drop(columns=[self.target_column]).to_numpy(dtype=np.float32)
@@ -56,12 +62,15 @@ class TabularPipeline(Pipeline):
             normalizer.fit(X_train)
  
             # 5. attach as per-sample transform on all splits
-            train_set.dataset.transforms = [normalizer]  # Subset.dataset is the raw TabularDataset
             # val and test share the same underlying dataset so we need
             # to apply transforms at the Subset level instead
-            train_set = _wrap_with_transform(train_set, normalizer)
-            val_set = _wrap_with_transform(val_set, normalizer)
-            test_set = _wrap_with_transform(test_set, normalizer)
+            X_train_raw, y_train = train_set.get_all()  # still raw, no transforms yet
+            X_val_raw, y_val = val_set.get_all()
+            X_test_raw, y_test = test_set.get_all()
+
+            train_set = TabularDataset(X_train_raw, y_train, transforms=[normalizer])
+            val_set = TabularDataset(X_val_raw, y_val, transforms=[normalizer])
+            test_set = TabularDataset(X_test_raw, y_test, transforms=[normalizer])
  
         return {
             "train": train_set,
@@ -71,9 +80,6 @@ class TabularPipeline(Pipeline):
         }
  
  
-def _wrap_with_transform(subset, transform):
-    X, y = subset.get_all()  # raw values via Subset indices, no transforms yet
-    return TabularDataset(X, y, transforms=[transform])
 
 
 

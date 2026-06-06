@@ -49,5 +49,5 @@ class Adam(Optimizer):
                 v_corrected = v_raw/(1 - self.dr ** self.t)
 
                 p.data -= ((self.lr * m_corrected)/(np.sqrt(v_corrected) + self.epsilon))
-                p.grad = None
+                p.zero_grad()
             

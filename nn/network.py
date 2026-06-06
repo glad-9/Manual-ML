@@ -125,6 +125,6 @@ class Network:
         self.set_training_mode(False)
         loss = self.compute_loss(X, y).data
         y_hat = self.predict(X)
-        accuracy = np.mean((y_hat.data >= 0.5) == y.data)
+        accuracy = np.mean((y_hat.data >= 0.5) == (y.data if isinstance(y, Tensor) else y))
         return {"loss": loss, "accuracy": accuracy}, y_hat, y
     

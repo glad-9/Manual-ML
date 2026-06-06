@@ -1,4 +1,5 @@
 import yaml
+import numpy as np
 
 from data_processing.tabular.tabularpipeline import TabularPipeline
 from viz.training import plot_loss
@@ -8,7 +9,7 @@ from core.tensor import Tensor
 from nn.builder import build_network
 
 def main():
-    config_path = "experiments/configs/diabetes.yaml"
+    config_path = "experiments/configs/breast_cancer.yaml"
 
     with open(config_path) as f:
         config = yaml.safe_load(f)
@@ -45,9 +46,9 @@ def main():
     print(f"---------------------------\nFinal Costs:\nFinal Train Cost: {train_cost[-1]}\nFinal Best CV Cost: {model.best_val_loss}")
     print(f"---------------------------\nTest Set Results:\nTest Cost: {results["loss"]}\nTest Accuracy: {results["accuracy"]}")
 
-    plot_confusion_matrix(y_hat, y_true)
-
     plot_loss(train_cost, cv_cost)
+
+    plot_confusion_matrix(y_hat, y_true)
 
 if __name__ == '__main__':
     main()

@@ -22,4 +22,4 @@ class Adagrad(Optimizer):
 
                 self.sq_grads[key] += grad ** 2
                 p.data -= ((self.lr * grad)/np.sqrt(self.sq_grads[key] + self.epsilon))
-                p.grad = None
+                p.zero_grad()

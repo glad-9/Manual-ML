@@ -12,7 +12,7 @@ class SGD(Optimizer):
                     p.grad += self.reg * p.data
 
                 p.data -= self.lr * p.grad
-                p.grad = None
+                p.zero_grad()
 
                 
 

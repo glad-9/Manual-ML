@@ -27,4 +27,4 @@ class RMSprop(Optimizer):
 
                 self.sq_grads[key] = v_next
                 p.data -= ((self.lr * grad)/np.sqrt(v_next + self.epsilon))
-                p.grad = None
+                p.zero_grad()
