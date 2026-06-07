@@ -241,10 +241,50 @@ class Tensor:
         return out
 
     def pool2d(self, pool_size, stride):
-        op = ...
-        out = Tensor(...)
+        n, c, h, w = self.data.shape
+        if stride is None:
+            stride = pool_size
 
-        def _backward(): ...
+        h_out = ((h - pool_size) // stride) + 1
+        w_out = ((w - pool_size) // stride) + 1
+
+        out_data = np.zeros((n, c, h_out, w_out))
+        mask = np.zeros_like(self.data)  # Remember where maxes are
+
+        for i in range(h_out):
+            for j in range(w_out):
+                h_start = i * stride
+                w_start = j * stride
+
+                patch = self.data[
+                    :, :, h_start : h_start + pool_size, w_start : w_start + pool_size
+                ]
+                
+                # Get max value per patch whilst keeping dimensionality 
+                max_vals = np.max(patch, axis=(2, 3), keepdims=True)  # (n, c, 1, 1)
+
+                out_data[:, :, i, j] = max_vals[:, :, 0, 0]
+
+                # Create position mask by checking what value in the patch is equivalent to the max
+                mask[
+                    :, :, h_start : h_start + pool_size, w_start : w_start + pool_size
+                ] = (patch == max_vals)
+
+
+        out = self._create_results(out_data, self)
+
+        def _backward():
+            assert out.grad is not None
+            grad = np.zeros_like(self.data)
+            for i in range(h_out):
+                for j in range(w_out):
+                    h_start = i * stride
+                    w_start = j * stride
+
+                    grad[:, :, h_start: h_start + pool_size, w_start: w_start + pool_size] += \
+                            mask[:, :, h_start: h_start + pool_size, w_start: w_start + pool_size]* \
+                            out.grad[:, :, i:i+1, j:j+1]
+            self._accumulate_grad(grad)
 
         out._backward = _backward
         return out
