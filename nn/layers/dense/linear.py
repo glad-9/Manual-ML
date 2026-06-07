@@ -1,7 +1,8 @@
 import numpy as np
 
 from core.tensor import Tensor
-from .base import Layer
+from layers.base import Layer
+
 
 class Linear(Layer):
     def __init__(self, input_size, output_size, initializer):
@@ -9,8 +10,10 @@ class Linear(Layer):
         self.output_size = output_size
 
         self.shape = (input_size, output_size)
-        
-        self.W = Tensor(initializer.initialize(self.shape), requires_grad=True, requires_reg=True)
+
+        self.W = Tensor(
+            initializer.initialize(self.shape), requires_grad=True, requires_reg=True
+        )
         self.b = Tensor(np.zeros((1, output_size)), requires_grad=True)
 
     def forward(self, X):
@@ -21,14 +24,8 @@ class Linear(Layer):
         return [self.W, self.b]
 
     def save_state(self):
-        return {
-            "W" : self.W.data.copy(),
-            "b" : self.b.data.copy()
-        }
+        return {"W": self.W.data.copy(), "b": self.b.data.copy()}
 
     def load_state(self, state):
-        self.W  = Tensor(state["W"].copy(), requires_grad=True)
-        self.B  = Tensor(state["b"].copy(), requires_grad=True)
-
-
-
+        self.W = Tensor(state["W"].copy(), requires_grad=True, requires_reg=True)
+        self.B = Tensor(state["b"].copy(), requires_grad=True)

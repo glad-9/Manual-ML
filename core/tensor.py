@@ -38,7 +38,11 @@ class Tensor:
         return self.data.shape
 
     def __getitem__(self, idx):
-        return Tensor(self.data[idx])
+        return Tensor(
+            self.data[idx],
+            requires_grad=self.requires_grad,
+            requires_reg=self.requires_reg,
+        )
 
     def _accumulate_grad(self, grad):
         if not self.requires_grad:
@@ -154,6 +158,30 @@ class Tensor:
     def __neg__(self):
         return self * -1.0
 
+    def reshape(self, *shape):
+        op = self.data.reshape(shape)
+        out = self._create_results(op, self)
+        out.op = "reshape"
+
+        def _backward():
+            assert out.grad is not None
+            self._accumulate_grad(out.grad.reshape(self.data.shape))
+
+        out._backward = _backward
+        return out
+
+    def transpose(self, *axes):
+        op = self.data.transpose(axes)
+        out = self._create_results(op, self)
+        out.op = "transpose"
+
+        def _backward():
+            assert out.grad is not None
+            self._accumulate_grad(out.grad.transpose(np.argsort(axes)))
+
+        out._backward = _backward
+        return out
+
     def log(self):
         op = np.log(self.data)
         out = self._create_results(op, self)
@@ -198,6 +226,28 @@ class Tensor:
     def var(self):
         mean = self.mean()
         return ((self - mean) ** 2).mean()
+
+    def pad2d(self, p):
+        n, c, h, w = self.data.shape
+        padded = np.zeros((n, c, h + (2 * p), w + (2 * p)), dtype=self.data.dtype)
+        padded[:, :, p : p + h, p : p + w] = self.data
+        out = self._create_results(padded, self)
+
+        def _backward():
+            assert out.grad is not None
+            self._accumulate_grad(out.grad[:, :, p : h + p, p : w + p])
+
+        out._backward = _backward
+        return out
+
+    def pool2d(self, pool_size, stride):
+        op = ...
+        out = Tensor(...)
+
+        def _backward(): ...
+
+        out._backward = _backward
+        return out
 
     def relu(self):
         op = np.maximum(0, self.data)

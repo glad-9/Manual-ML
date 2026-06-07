@@ -1,5 +1,6 @@
 import numpy as np
-from .base import Layer
+from layers.base import Layer
+
 
 class Dropout(Layer):
     def __init__(self, dropout_rate):
@@ -19,3 +20,4 @@ class Dropout(Layer):
 
     def load_state(self, state):
         pass
+

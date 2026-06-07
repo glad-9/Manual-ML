@@ -1,4 +1,6 @@
 from abc import ABC, abstractmethod
+from core.tensor import Tensor
+
 
 class Layer(ABC):
     training: bool = True
@@ -13,7 +15,7 @@ class Layer(ABC):
 
     @abstractmethod
     def forward(self, X):
-        pass
+        return Tensor(...)
 
     @abstractmethod
     def save_state(self):
