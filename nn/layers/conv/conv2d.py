@@ -1,6 +1,6 @@
 import numpy as np
 
-from layers.base import Layer
+from nn.layers.base import Layer
 from core.tensor import Tensor
 
 

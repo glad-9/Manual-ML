@@ -1,5 +1,5 @@
 import numpy as np
-from layers.base import Layer
+from nn.layers.base import Layer
 
 
 class Dropout(Layer):
@@ -20,4 +20,3 @@ class Dropout(Layer):
 
     def load_state(self, state):
         pass
-

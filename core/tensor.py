@@ -48,6 +48,7 @@ class Tensor:
         if not self.requires_grad:
             return
 
+        grad = np.clip(grad, -1, 1)
         grad = self._unbroadcast(grad, self.data.shape)
 
         if self.grad is None:
@@ -182,6 +183,18 @@ class Tensor:
         out._backward = _backward
         return out
 
+    def clip(self, min_val, max_val):
+        op = np.clip(self.data, min_val, max_val)
+        out = self._create_results(op, self)
+
+        def _backward():
+            mask = (self.data >= min_val) & (self.data <= max_val)
+            self._accumulate_grad(out.grad * mask)
+
+        out._backward = _backward
+
+        return out
+
     def log(self):
         op = np.log(self.data)
         out = self._create_results(op, self)
@@ -240,8 +253,12 @@ class Tensor:
         out._backward = _backward
         return out
 
-    def pool2d(self, pool_size, stride):
+    def pool2d(self, pool_size=2, stride=None):
         n, c, h, w = self.data.shape
+
+        if pool_size is None:
+            pool_size = 2
+
         if stride is None:
             stride = pool_size
 
@@ -259,8 +276,8 @@ class Tensor:
                 patch = self.data[
                     :, :, h_start : h_start + pool_size, w_start : w_start + pool_size
                 ]
-                
-                # Get max value per patch whilst keeping dimensionality 
+
+                # Get max value per patch whilst keeping dimensionality
                 max_vals = np.max(patch, axis=(2, 3), keepdims=True)  # (n, c, 1, 1)
 
                 out_data[:, :, i, j] = max_vals[:, :, 0, 0]
@@ -268,8 +285,7 @@ class Tensor:
                 # Create position mask by checking what value in the patch is equivalent to the max
                 mask[
                     :, :, h_start : h_start + pool_size, w_start : w_start + pool_size
-                ] = (patch == max_vals)
-
+                ] = patch == max_vals
 
         out = self._create_results(out_data, self)
 
@@ -281,9 +297,20 @@ class Tensor:
                     h_start = i * stride
                     w_start = j * stride
 
-                    grad[:, :, h_start: h_start + pool_size, w_start: w_start + pool_size] += \
-                            mask[:, :, h_start: h_start + pool_size, w_start: w_start + pool_size]* \
-                            out.grad[:, :, i:i+1, j:j+1]
+                    grad[
+                        :,
+                        :,
+                        h_start : h_start + pool_size,
+                        w_start : w_start + pool_size,
+                    ] += (
+                        mask[
+                            :,
+                            :,
+                            h_start : h_start + pool_size,
+                            w_start : w_start + pool_size,
+                        ]
+                        * out.grad[:, :, i : i + 1, j : j + 1]
+                    )
             self._accumulate_grad(grad)
 
         out._backward = _backward
@@ -322,11 +349,14 @@ class Tensor:
         return exp / exp.sum(axis=1)
 
     def bce(self, y):
-        self.data = np.clip(self.data, 1e-7, 1 - 1e-7)
-        return -(y * self.log() + (Tensor(1.0) - y) * (Tensor(1.0) - self).log()).mean()
+        clipped = self.clip(1e-7, 1 - 1e-7)
+        return -(
+            y * clipped.log() + (Tensor(1.0) - y) * (Tensor(1.0) - clipped).log()
+        ).mean()
 
     def mse(self, y):
         return (Tensor(0.5) * ((self - y) ** 2)).mean()
 
     def ce(self, y):
-        return -(y * self.log()).sum(axis=1).mean()
+        clipped = self.clip(1e-7, 1.0)
+        return -(y * clipped.log()).sum(axis=1).mean()

@@ -9,43 +9,44 @@ from core.tensor import Tensor
 class Network:
     def __init__(self, layers, loss, optimizer, batcher):
         self.layers = layers  # List of Layer objects
-        self.loss = loss() # Loss object containing cost function and cost derivative
-        self.optimizer = optimizer # Pre-initialized optimizer
-        self.batcher = batcher # Pre-initialized Batcher object
+        self.loss = loss()  # Loss object containing cost function and cost derivative
+        self.optimizer = optimizer  # Pre-initialized optimizer
+        self.batcher = batcher  # Pre-initialized Batcher object
 
         self.best_model_state = None
-        self.best_val_loss = float('inf')
+        self.best_val_loss = float("inf")
 
-    def set_training_mode(self, mode:bool):
+    def set_training_mode(self, mode: bool):
         Layer.set_training(mode)
-    
+
     def forward_prop(self, X):
         activation = X
         for layer in self.layers:
             activation = layer.forward(activation)
-        
+
         return activation
 
     def compute_loss(self, X, y):
         y = y if isinstance(y, Tensor) else Tensor(y)
         y_hat = self.forward_prop(X)
-        
+
         return self.loss.forward(y_hat, y)
-        
 
     def backward_prop(self, X_batch, y_batch):
         loss = self.compute_loss(X_batch, y_batch)
         loss.backward()
-        
+
         return loss.data
 
-    def fit(self, train_data, iterations=10000, patience=20, val_data=None, save_path=None):
+    def fit(
+        self, train_data, iterations=10000, patience=10, val_data=None, save_path=None
+    ):
         Layer.set_training(True)
         X_train, y_train = train_data
         train_history = []
         val_history = []
         patience_counter = 0
-        
+
         for i in range(iterations):
             self.set_training_mode(True)
             epoch_loss = []
@@ -59,14 +60,15 @@ class Network:
             else:
                 batch_cost = self.backward_prop(X_train, y_train)
                 self.optimizer.step(self.layers)
-            
 
             if i % 100 == 0:
                 self.set_training_mode(False)
                 total_train_loss = self.compute_loss(X_train, y_train).data
                 train_history.append(total_train_loss)
 
-                print(f"Epoch: {i/100}\nFull Batch Train Cost: {total_train_loss}\nBatch Train Cost: {epoch_loss[-1] if len(epoch_loss) != 0 else "NA"}")
+                print(
+                    f"Epoch: {i / 100}\nFull Batch Train Cost: {total_train_loss}\nBatch Train Cost: {epoch_loss[-1] if len(epoch_loss) != 0 else 'NA'}"
+                )
 
                 if val_data is not None:
                     X_val, y_val = val_data
@@ -78,7 +80,7 @@ class Network:
                         self.best_val_loss = total_val_loss
                         patience_counter = 0
 
-                        # Save best model 
+                        # Save best model
                         self.best_model_state = self.save_model()
 
                     else:
@@ -104,8 +106,8 @@ class Network:
         if path:
             if os.path.dirname(path):
                 os.makedirs(os.path.dirname(path), exist_ok=True)
-            with open(path,"wb") as f:
-                pickle.dump(state,f)
+            with open(path, "wb") as f:
+                pickle.dump(state, f)
         return state
 
     def load_model(self, state=None, path=None):
@@ -125,6 +127,7 @@ class Network:
         self.set_training_mode(False)
         loss = self.compute_loss(X, y).data
         y_hat = self.predict(X)
-        accuracy = np.mean((y_hat.data >= 0.5) == (y.data if isinstance(y, Tensor) else y))
+        accuracy = np.mean(
+            (y_hat.data >= 0.5) == (y.data if isinstance(y, Tensor) else y)
+        )
         return {"loss": loss, "accuracy": accuracy}, y_hat, y
-    

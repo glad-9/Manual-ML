@@ -1,18 +1,18 @@
 Current Goals:
-- Fix non-converging gradient descent
+- CNNs & Image processing
 - Robust Data processing
-- Visualization Scripts
 - Test out experiments on various datasets
 
-
 Near-future:
-- CNNs & Image processing
-
+- RNNs
+- LSTMs
 
 Later:
 - Feature Engineering
 
 Finished:
+- Visualization Scripts
+- Fix non-converging gradient descent
 - Softmax activation + Cross Entropy Loss
 - Refactor code to match Tensor API
 - Change it so that batching receives numpy arrays and dynamically converts yielded batches into tensors

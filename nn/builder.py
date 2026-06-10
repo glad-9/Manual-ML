@@ -6,13 +6,18 @@ from nn.initializers.he import He
 from nn.initializers.xavier import Xavier
 
 from nn.layers.linear import Linear
-from nn.layers.dropout import Dropout
-from nn.layers.batchnorm import BatchNorm
 
-from nn.activations.relu import ReLU
-from nn.activations.sigmoid import Sigmoid
-from nn.activations.tanh import Tanh
-from nn.activations.softmax import Softmax
+from nn.layers.conv.conv2d import Conv2D
+from nn.layers.conv.flatten import Flatten
+from nn.layers.conv.maxpool2d import MaxPool2D
+
+from nn.layers.regularization.dropout import Dropout
+from nn.layers.regularization.batchnorm import BatchNorm
+
+from nn.layers.activations.relu import ReLU
+from nn.layers.activations.sigmoid import Sigmoid
+from nn.layers.activations.tanh import Tanh
+from nn.layers.activations.softmax import Softmax
 
 from nn.loss.bce import BCE
 from nn.loss.mse import MSE
@@ -35,6 +40,10 @@ LAYERS = {
     "linear": Linear,
     "dropout": Dropout,
     "batchnorm": BatchNorm,
+
+    "conv2d": Conv2D,
+    "maxpool2d": MaxPool2D,
+    "flatten": Flatten,
 
     "relu":  ReLU,
     "sigmoid": Sigmoid,
@@ -70,6 +79,25 @@ def build_layer(layer_cfg, prev_size):
     elif layer_type == "dropout":
         return Dropout(layer_cfg["rate"]), prev_size
 
+    elif layer_type == "conv2d":
+        initializer = INITIALIZERS[layer_cfg.get("initializer", "he")]()
+        k_size = layer_cfg["k_size"]
+        k_size = tuple(k_size) if isinstance(k_size, list) else (k_size, k_size)
+        layer = Conv2D(
+        in_channels=layer_cfg["in_channels"],
+        out_channels=layer_cfg["out_channels"],
+        k_size=k_size,
+        initializer=initializer,
+        stride=layer_cfg.get("stride", 1),
+        pad=layer_cfg.get("pad", False),
+        )
+        return layer, layer_cfg["out_channels"]
+
+    elif layer_type == "maxpool2d":
+        return MaxPool2D(pool_size=layer_cfg["pool_size"],
+                         stride=layer_cfg.get("stride", None),
+                         ), prev_size
+   
     elif layer_type in LAYERS:
         return LAYERS[layer_type](), prev_size
 

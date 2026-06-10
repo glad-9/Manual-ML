@@ -1,0 +1,41 @@
+dataset:
+  path: na
+  label: na
+  categorical: []
+  drop: []
+  train_ratio: na
+  val_ratio: na
+  normalize: na
+
+layers:
+  - type: linear
+    output_size: 24
+  - type: relu
+  - type: dropout
+    rate: 0.2
+  - type: linear
+    output_size: 16
+  - type: relu
+  - type: dropout
+    rate: 0.1
+  - type: linear
+    output_size: 10
+    initializer: xavier
+  - type: softmax
+
+training:
+  loss: ce
+
+  optimizer:
+    type: adam
+    lr: 0.0005
+    reg: 0.001
+
+  batching:
+    enabled: False
+    method: standard
+    batch_size: 10000
+    drop_last: True
+    shuffle: True
+
+  iterations: 10000

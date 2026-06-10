@@ -1,6 +1,6 @@
 import numpy as np
 from core.tensor import Tensor
-from layers.base import Layer
+from nn.layers.base import Layer
 
 
 class BatchNorm(Layer):
@@ -57,4 +57,3 @@ class BatchNorm(Layer):
         self.beta = Tensor(state["beta"].copy(), requires_grad=True)
         self.running_mean = Tensor(state["running_mean"].copy())
         self.running_var = Tensor(state["running_var"].copy())
-

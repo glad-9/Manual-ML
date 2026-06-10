@@ -1,4 +1,4 @@
-from layers.base import Layer
+from nn.layers.base import Layer
 
 
 class MaxPool2D(Layer):
