@@ -32,4 +32,3 @@ def plot_loss(train_history, val_history=None, title="Loss Curve"):
 
     plt.tight_layout()
     plt.show()
-

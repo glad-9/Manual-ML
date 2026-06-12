@@ -1,5 +1,5 @@
-import numpy as np
 from data_processing.base import Transformer
+
 
 class Normalizer(Transformer):
     def __init__(self, epsilon=1e-8):
@@ -9,9 +9,7 @@ class Normalizer(Transformer):
 
     def fit(self, X):
         self.mean = X.mean(axis=0)
-        self.std = np.sqrt(X.var(axis=0) + self.epsilon)
+        self.std = X.var(axis=0, epsilon=self.epsilon)
 
     def __call__(self, x):
         return (x - self.mean) / self.std
-
-    

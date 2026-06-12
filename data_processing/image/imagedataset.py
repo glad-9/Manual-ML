@@ -5,8 +5,8 @@ from data_processing.base import Dataset
 class ImageDataset(Dataset):
     def __init__(self, X, y, transforms=None):
         super().__init__()
-        self.X = X.astype(np.float32)
-        self.y = y.astype(np.float32)
+        self.X = X
+        self.y = y
         self.transforms = transforms or []
 
     def __len__(self):
@@ -25,4 +25,4 @@ class ImageDataset(Dataset):
 
     @property
     def n_features(self):
-        return self.X.shape[1]
+        return self.X.shape[1:]

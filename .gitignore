@@ -6,15 +6,9 @@ __pycache__/
 venv/
 .env/
 
-# Datasets (usually too large / noisy)
+# Datasets
 datasets/
 
 # Saved Models (for now)
 saved_models/
 
-# TODO
-# TODO
-
-# IDE
-.vscode/
-.idea/

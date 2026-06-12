@@ -111,8 +111,8 @@ class Tensor:
         out.op = "matmul"
 
         def _backward():
-            self._accumulate_grad(out.grad @ other.data.T)
-            other._accumulate_grad(self.data.T @ out.grad)
+            self._accumulate_grad(out.grad @ other.data.swapaxes(-1, -2))
+            other._accumulate_grad(self.data.swapaxes(-1, -2) @ out.grad)
 
         out._backward = _backward
         return out
@@ -217,11 +217,11 @@ class Tensor:
         out._backward = _backward
         return out
 
-    def sum(self, axis=None):
+    def sum(self, axis=None, keepdims=True):
         op = (
             np.sum(self.data)
             if axis is None
-            else np.sum(self.data, axis=axis, keepdims=True)
+            else np.sum(self.data, axis=axis, keepdims=keepdims)
         )
         out = self._create_results(op, self)
         out.op = "sum"
@@ -232,13 +232,17 @@ class Tensor:
         out._backward = _backward
         return out
 
-    def mean(self):
+    def mean(self, axis=None, keepdims=True):
         n = self.data.size
-        return self.sum() / n
+        return self.sum(axis, keepdims) / n
 
-    def var(self):
-        mean = self.mean()
+    def var(self, axis=None, keepdims=True):
+        mean = self.mean(axis, keepdims)
         return ((self - mean) ** 2).mean()
+
+    def std(self, axis=None, keepdims=True, epsilon=1e-8):
+        var = self.var(axis=axis, keepdims=keepdims)
+        return (var + epsilon) ** 0.5
 
     def pad2d(self, p):
         n, c, h, w = self.data.shape
@@ -310,6 +314,37 @@ class Tensor:
                             w_start : w_start + pool_size,
                         ]
                         * out.grad[:, :, i : i + 1, j : j + 1]
+                    )
+            self._accumulate_grad(grad)
+
+        out._backward = _backward
+        return out
+
+    def im2col(self, kH, kW, stride, h_out, w_out):
+        n, c, h, w = self.data.shape
+        col = np.zeros((n, h_out * w_out, kH * kW * c))
+
+        for i in range(h_out):
+            for j in range(w_out):
+                h_start = i * stride
+                w_start = j * stride
+
+                patch = self.data[:, :, h_start : h_start + kH, w_start : w_start + kW]
+                col[:, i * w_out + j, :] = patch.reshape(n, -1)
+
+        out = self._create_results(col, self)
+        out.op = "im2col"
+
+        def _backward():
+            assert out.grad is not None
+            grad = np.zeros_like(self.data)
+            for i in range(h_out):
+                for j in range(w_out):
+                    h_start = i * stride
+                    w_start = j * stride
+                    patch_grad = out.grad[:, i * w_out + j, :].reshape(n, c, kH, kW)
+                    grad[:, :, h_start : h_start + kH, w_start : w_start + kW] += (
+                        patch_grad
                     )
             self._accumulate_grad(grad)
 

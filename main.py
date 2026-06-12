@@ -1,8 +1,7 @@
 import yaml
 
-from cli.mnist_mlp import run_mnist_mlp
-
 from data_processing.tabular.tabularpipeline import TabularPipeline
+from data_processing.image.imagepipeline import ImagePipeline
 from viz.training import plot_loss
 from viz.evaluation import plot_confusion_matrix
 
@@ -10,13 +9,13 @@ from nn.builder import build_network
 
 
 def main():
-    config_path = "experiments/mnist-mlp/mnist-mlp.yaml"
+    config_path = "experiments/mnist-conv/mnist-conv.yaml"
 
     with open(config_path) as f:
         config = yaml.safe_load(f)
 
-    # dc = config["dataset"]
-    #
+    dc = config["dataset"]
+
     # pipeline = TabularPipeline(
     #     path=dc["path"],
     #     target_column=dc["label"],
@@ -27,7 +26,15 @@ def main():
     #     normalize=dc["normalize"],
     # )
 
-    subsets = run_mnist_mlp()
+    pipeline = ImagePipeline(
+        images_path=dc["images_path"],
+        labels_path=dc["labels_path"],
+        train_ratio=dc["train_ratio"],
+        val_ratio=dc["val_ratio"],
+        normalize=dc["normalize"],
+    )
+
+    subsets = pipeline.run(idx=True, one_hot=True)
 
     X_train, y_train = subsets["train"].get_all()
     X_val, y_val = subsets["cv"].get_all()
@@ -41,7 +48,7 @@ def main():
         train_data=(X_train, y_train),
         val_data=(X_val, y_val),
         iterations=tc["iterations"],
-        save_path="saved_models/mnist-mlp.pkl",
+        save_path="saved_models/mnist-conv.pkl",
     )
 
     results, y_hat, y_true = model.evaluate(X_test, y_test)

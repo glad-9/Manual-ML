@@ -1,5 +1,7 @@
 import yaml
+import numpy as np
 
+from core.tensor import Tensor
 from nn.network import Network
 
 from nn.initializers.he import He
@@ -40,20 +42,18 @@ LAYERS = {
     "linear": Linear,
     "dropout": Dropout,
     "batchnorm": BatchNorm,
-
     "conv2d": Conv2D,
     "maxpool2d": MaxPool2D,
     "flatten": Flatten,
-
-    "relu":  ReLU,
+    "relu": ReLU,
     "sigmoid": Sigmoid,
     "tanh": Tanh,
     "softmax": Softmax,
 }
 
 LOSSES = {
-    "mse":MSE,
-    "bce":BCE,
+    "mse": MSE,
+    "bce": BCE,
     "ce": CE,
 }
 
@@ -65,12 +65,18 @@ OPTIMIZERS = {
     "adam": Adam,
 }
 
+
 def build_layer(layer_cfg, prev_size):
     layer_type = layer_cfg["type"]
 
     if layer_type == "linear":
         initializer = INITIALIZERS[layer_cfg.get("initializer", "he")]()
-        layer = Linear(prev_size, layer_cfg["output_size"], initializer=initializer)
+        input_size = layer_cfg.get("input_size", None)
+        layer = Linear(
+            input_size=input_size if input_size is not None else prev_size,
+            output_size=layer_cfg["output_size"],
+            initializer=initializer,
+        )
         return layer, layer_cfg["output_size"]
 
     elif layer_type == "batchnorm":
@@ -81,32 +87,33 @@ def build_layer(layer_cfg, prev_size):
 
     elif layer_type == "conv2d":
         initializer = INITIALIZERS[layer_cfg.get("initializer", "he")]()
-        k_size = layer_cfg["k_size"]
+        k_size = layer_cfg["kernel_size"]
         k_size = tuple(k_size) if isinstance(k_size, list) else (k_size, k_size)
         layer = Conv2D(
-        in_channels=layer_cfg["in_channels"],
-        out_channels=layer_cfg["out_channels"],
-        k_size=k_size,
-        initializer=initializer,
-        stride=layer_cfg.get("stride", 1),
-        pad=layer_cfg.get("pad", False),
+            in_channels=prev_size,
+            out_channels=layer_cfg["out_channels"],
+            k_size=k_size,
+            initializer=initializer,
+            stride=layer_cfg.get("stride", 1),
+            pad=layer_cfg.get("pad", False),
         )
         return layer, layer_cfg["out_channels"]
 
     elif layer_type == "maxpool2d":
-        return MaxPool2D(pool_size=layer_cfg["pool_size"],
-                         stride=layer_cfg.get("stride", None),
-                         ), prev_size
-   
+        return MaxPool2D(
+            pool_size=layer_cfg["pool_size"],
+            stride=layer_cfg.get("stride", None),
+        ), prev_size
+
     elif layer_type in LAYERS:
         return LAYERS[layer_type](), prev_size
 
 
-def build_network(config_path, feature_count):
-    with open (config_path) as f:
+def build_network(config_path, input_size):
+    with open(config_path) as f:
         config = yaml.safe_load(f)
 
-    prev_size = feature_count
+    prev_size = input_size
 
     layers = []
     for layer_cfg in config["layers"]:
@@ -124,7 +131,7 @@ def build_network(config_path, feature_count):
         method=batch_cfg.get("method", "standard"),
         batch_size=batch_cfg.get("batch_size", 32),
         drop_last=batch_cfg.get("drop_last", True),
-        shuffle=batch_cfg.get("shuffle", True)
+        shuffle=batch_cfg.get("shuffle", True),
     )
     if not batch_cfg.get("enabled"):
         dataloader.enabled = False

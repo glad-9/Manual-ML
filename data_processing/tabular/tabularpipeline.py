@@ -69,9 +69,15 @@ class TabularPipeline(Pipeline):
             X_val_raw, y_val = val_set.get_all()
             X_test_raw, y_test = test_set.get_all()
 
-            train_set = TabularDataset(X_train_raw, y_train, transforms=[normalizer])
-            val_set = TabularDataset(X_val_raw, y_val, transforms=[normalizer])
-            test_set = TabularDataset(X_test_raw, y_test, transforms=[normalizer])
+            train_set = TabularDataset(
+                X_train_raw, y_train.reshape(-1, 1), transforms=[normalizer]
+            )
+            val_set = TabularDataset(
+                X_val_raw, y_val.reshape(-1, 1), transforms=[normalizer]
+            )
+            test_set = TabularDataset(
+                X_test_raw, y_test.reshape(-1, 1), transforms=[normalizer]
+            )
 
         return {
             "train": train_set,

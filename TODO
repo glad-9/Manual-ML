@@ -4,8 +4,10 @@ Current Goals:
 - Test out experiments on various datasets
 
 Near-future:
-- RNNs
-- LSTMs
+- RNN Layer
+- GRU Layer
+- LSTM Layer
+- Embedding Layer
 
 Later:
 - Feature Engineering
@@ -15,7 +17,6 @@ Finished:
 - Fix non-converging gradient descent
 - Softmax activation + Cross Entropy Loss
 - Refactor code to match Tensor API
-- Change it so that batching receives numpy arrays and dynamically converts yielded batches into tensors
 - Tensors
 - Autograd
 - One-hot Encoding

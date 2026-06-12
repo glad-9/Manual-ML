@@ -23,6 +23,7 @@ class Network:
         activation = X
         for layer in self.layers:
             activation = layer.forward(activation)
+            # print(type(layer).__name__, activation.data.shape)
 
         return activation
 

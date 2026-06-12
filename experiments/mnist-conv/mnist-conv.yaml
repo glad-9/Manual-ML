@@ -1,7 +1,9 @@
 dataset:
-  path: -
+  images_path: datasets/raw/mnist/train-images.idx3-ubyte
+  labels_path: datasets/raw/mnist/train-labels.idx1-ubyte
   train_ratio: 0.8
   val_ratio: 0.1
+  normalize: True
 
 layers:
   - type: conv2d
@@ -35,6 +37,7 @@ layers:
   - type: flatten
 
   - type: linear
+    input_size: 784
     output_size: 128
   - type: relu
   - type: dropout
@@ -55,7 +58,7 @@ training:
   batching:
     enabled: true
     method: standard
-    batch_size: 64
+    batch_size: 512
     drop_last: true
     shuffle: true
 

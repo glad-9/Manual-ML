@@ -8,21 +8,14 @@ def load_csv(file):
     return df
 
 
-def load_idx_to_csv(file):
-    ndarray_data = idx2numpy.convert_from_file(file)
-    num_images, height, width = ndarray_data.shape
-    flattened_data = ndarray_data.reshape(num_images, height * width)
+def load_idx(image_file, label_file):
+    X = idx2numpy.convert_from_file(image_file)  # (N, H, W)
+    y = idx2numpy.convert_from_file(label_file)  # (N,)
 
-    df = pd.DataFrame(flattened_data)
-    return df
+    X = X[:, np.newaxis, :, :].astype(np.float32)  # (N, 1, H, W)
+    y = y.astype(np.float32)
+
+    return X, y
 
 
-def load_idx(file):
-    with open(file, "rb") as f:
-        magic = int.from_bytes(f.read(4), "big")
-        ndim = magic & 0xFF  # last byte encodes number of dimensions
-
-        dims = tuple(int.from_bytes(f.read(4), "big") for _ in range(ndim))
-        data = np.frombuffer(f.read(), dtype=np.uint8)
-
-    return data.reshape(dims)
+def load_image_folder(image_path, label_path): ...
