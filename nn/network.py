@@ -42,7 +42,7 @@ class Network:
     def fit(
         self,
         train_data,
-        iterations=10000,
+        max_epochs=1000,
         patience=20,
         val_data=None,
         save_path=None,
@@ -54,65 +54,55 @@ class Network:
         val_history = []
         patience_counter = 0
 
-        train_size = X_train.shape[0]
+        batching = self.batcher.enabled
 
-        if self.batcher.enabled:
-            batching = True
-            batch_size = self.batcher.batch_size
-        else:
-            batching = False
-            batch_size = train_size
-
-        i_per_epoch = train_size // batch_size
-
-        for i in range(iterations):
+        for epoch in range(max_epochs):
             self.set_training_mode(True)
-            epoch_loss = []
+            epoch_losses = []
 
             if batching:
                 for X_batch, y_batch in self.batcher.get_batch(X_train, y_train):
                     batch_cost = self.backward_prop(X_batch, y_batch)
-                    epoch_loss.append(batch_cost)
-
+                    epoch_losses.append(batch_cost)
                     self.optimizer.step(self.layers)
             else:
                 batch_cost = self.backward_prop(X_train, y_train)
                 self.optimizer.step(self.layers)
+                epoch_losses.append(batch_cost)
 
-            if i % i_per_epoch == 0:
-                self.set_training_mode(False)
-                total_train_loss = self.compute_loss(X_train, y_train).data.get()
-                train_history.append(total_train_loss)
+            self.set_training_mode(False)
+            total_train_loss = self.compute_loss(X_train, y_train).data.get()
+            train_history.append(total_train_loss)
 
-                print(
-                    f"Epoch: {i // i_per_epoch}\nFull Train Cost: {total_train_loss}\nBatch Train Cost: {epoch_loss[-1] if len(epoch_loss) != 0 else 'NA'}"
-                )
+            print(
+                f"Epoch: {epoch}\n"
+                f"Full Train Loss: {total_train_loss}\n"
+                f"Batch Train Loss: {epoch_losses[-1] if epoch_losses else 'NA'}\n"
+            )
 
-                if val_data is not None:
-                    X_val, y_val = val_data
-                    total_val_loss = self.compute_loss(X_val, y_val).data.get()
-                    val_history.append(total_val_loss)
-                    print(f"Val Cost: {total_val_loss}")
+            if val_data is not None:
+                X_val, y_val = val_data
+                total_val_loss = self.compute_loss(X_val, y_val).data.get()
+                val_history.append(total_val_loss)
+                print(f"Val Cost: {total_val_loss}")
 
-                    if total_val_loss < self.best_val_loss:
-                        self.best_val_loss = total_val_loss
-                        patience_counter = 0
+                if total_val_loss < self.best_val_loss:
+                    self.best_val_loss = total_val_loss
+                    patience_counter = 0
 
-                        # Save best model
-                        self.best_model_state = self.save_model()
+                    # Save best model
+                    self.best_model_state = self.save_model()
 
-                        if self.best_val_loss < target_val_loss:
-                            print(
-                                f"Target CV Loss Achieved\nEarly stopping at epoch {i // i_per_epoch}"
-                            )
-                            break
-                    else:
-                        patience_counter += 1
-                        if patience_counter >= patience:
-                            print(
-                                f"Max Patience Reached\nEarly stopping at epoch {i // i_per_epoch}"
-                            )
-                            break
+                    if self.best_val_loss < target_val_loss:
+                        print(
+                            f"Target CV Loss Achieved\nEarly stopping at epoch {epoch}"
+                        )
+                        break
+                else:
+                    patience_counter += 1
+                    if patience_counter >= patience:
+                        print(f"Max Patience Reached\nEarly stopping at epoch {epoch}")
+                        break
 
         # Load best model at the end
         if self.best_model_state is not None:

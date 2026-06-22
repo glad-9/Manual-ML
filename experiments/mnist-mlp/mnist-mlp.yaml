@@ -25,6 +25,7 @@ layers:
 
 training:
   loss: ce
+  max_epochs: 1000
 
   optimizer:
     type: adam
@@ -38,4 +39,3 @@ training:
     drop_last: True
     shuffle: True
 
-  iterations: 10000

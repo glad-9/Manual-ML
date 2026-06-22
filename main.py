@@ -52,7 +52,7 @@ def main():
     train_cost, cv_cost = model.fit(
         train_data=(X_train, y_train),
         val_data=(X_val, y_val),
-        iterations=tc["iterations"],
+        max_epochs=tc["max_epochs"],
         patience=5,
         save_path="saved_models/mnist-conv.pkl",
     )
