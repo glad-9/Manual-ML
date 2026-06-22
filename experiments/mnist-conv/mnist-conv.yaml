@@ -45,6 +45,7 @@ layers:
 
   - type: linear
     output_size: 10
+    initializer: xavier
   - type: softmax
 
 training:

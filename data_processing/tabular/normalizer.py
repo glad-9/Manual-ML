@@ -8,8 +8,8 @@ class Normalizer(Transformer):
         self.stds = None
 
     def fit(self, X):
-        self.mean = X.mean(axis=0)
-        self.std = X.var(axis=0, epsilon=self.epsilon)
+        self.mean = X.mean()  # (1, C, 1, 1)
+        self.std = X.std() + self.epsilon
 
     def __call__(self, x):
         return (x - self.mean) / self.std

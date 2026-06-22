@@ -1,5 +1,4 @@
 import yaml
-import numpy as np
 
 from core.tensor import Tensor
 from nn.network import Network

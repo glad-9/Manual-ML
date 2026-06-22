@@ -28,4 +28,4 @@ class Linear(Layer):
 
     def load_state(self, state):
         self.W = Tensor(state["W"].copy(), requires_grad=True, requires_reg=True)
-        self.B = Tensor(state["b"].copy(), requires_grad=True)
+        self.b = Tensor(state["b"].copy(), requires_grad=True)

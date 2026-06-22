@@ -1,18 +1,28 @@
 Current Goals:
-- CNNs & Image processing
-- Robust Data processing
-- Test out experiments on various datasets
+- GPU stalling fix
+- Docstrings for layer types and network
+- RNN Layer
+- Embedding Layer
 
 Near-future:
-- RNN Layer
+- Robust Data processing
+- Test out experiments on various datasets
 - GRU Layer
 - LSTM Layer
-- Embedding Layer
 
 Later:
 - Feature Engineering
+- Conv3D
+- ConvLSTMs
+- Transformers
 
 Finished:
+- Docstrings for tensor.py
+- Docstrings for nn/optim
+- Optimized im2col and pool2d with NumPy/CuPy's stride_tricks.as_strided()
+- GPU accelerated training and inference with CuPy
+- CNN speedup + memory leak fix
+- CNNs & Image processing
 - Visualization Scripts
 - Fix non-converging gradient descent
 - Softmax activation + Cross Entropy Loss

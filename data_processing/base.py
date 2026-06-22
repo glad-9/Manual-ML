@@ -50,4 +50,3 @@ class Pipeline(ABC):
     @abstractmethod
     def run(self, **kwargs):
         pass
-

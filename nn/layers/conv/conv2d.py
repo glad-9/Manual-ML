@@ -22,10 +22,6 @@ class Conv2D(Layer):
             np.zeros((1, out_channels, 1, 1)).astype("float32"), requires_grad=True
         )
 
-    """
-    
-    """
-
     # def _im2col(self, X):
     #     # Extracting dimensions from input
     #     n, c, h, w = X.shape

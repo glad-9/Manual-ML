@@ -1,4 +1,3 @@
-import numpy as np
 from data_processing.base import Transformer
 
 

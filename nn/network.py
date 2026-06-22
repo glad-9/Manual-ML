@@ -40,7 +40,13 @@ class Network:
         return loss.data
 
     def fit(
-        self, train_data, iterations=10000, patience=10, val_data=None, save_path=None
+        self,
+        train_data,
+        iterations=10000,
+        patience=20,
+        val_data=None,
+        save_path=None,
+        target_val_loss=0.1,
     ):
         Layer.set_training(True)
         X_train, y_train = train_data
@@ -48,11 +54,22 @@ class Network:
         val_history = []
         patience_counter = 0
 
+        train_size = X_train.shape[0]
+
+        if self.batcher.enabled:
+            batching = True
+            batch_size = self.batcher.batch_size
+        else:
+            batching = False
+            batch_size = train_size
+
+        i_per_epoch = train_size // batch_size
+
         for i in range(iterations):
             self.set_training_mode(True)
             epoch_loss = []
 
-            if self.batcher.enabled:
+            if batching:
                 for X_batch, y_batch in self.batcher.get_batch(X_train, y_train):
                     batch_cost = self.backward_prop(X_batch, y_batch)
                     epoch_loss.append(batch_cost)
@@ -62,18 +79,18 @@ class Network:
                 batch_cost = self.backward_prop(X_train, y_train)
                 self.optimizer.step(self.layers)
 
-            if i % 100 == 0:
+            if i % i_per_epoch == 0:
                 self.set_training_mode(False)
-                total_train_loss = self.compute_loss(X_train, y_train).data
+                total_train_loss = self.compute_loss(X_train, y_train).data.get()
                 train_history.append(total_train_loss)
 
                 print(
-                    f"Epoch: {i / 100}\nFull Batch Train Cost: {total_train_loss}\nBatch Train Cost: {epoch_loss[-1] if len(epoch_loss) != 0 else 'NA'}"
+                    f"Epoch: {i // i_per_epoch}\nFull Train Cost: {total_train_loss}\nBatch Train Cost: {epoch_loss[-1] if len(epoch_loss) != 0 else 'NA'}"
                 )
 
                 if val_data is not None:
                     X_val, y_val = val_data
-                    total_val_loss = self.compute_loss(X_val, y_val).data
+                    total_val_loss = self.compute_loss(X_val, y_val).data.get()
                     val_history.append(total_val_loss)
                     print(f"Val Cost: {total_val_loss}")
 
@@ -84,15 +101,20 @@ class Network:
                         # Save best model
                         self.best_model_state = self.save_model()
 
+                        if self.best_val_loss < target_val_loss:
+                            print(
+                                f"Target CV Loss Achieved\nEarly stopping at epoch {i // i_per_epoch}"
+                            )
+                            break
                     else:
                         patience_counter += 1
                         if patience_counter >= patience:
-                            print(f"Early stopping at epoch {i // 100}")
-
-                            # Load best model at the end
-                            self.load_model(self.best_model_state)
+                            print(
+                                f"Max Patience Reached\nEarly stopping at epoch {i // i_per_epoch}"
+                            )
                             break
 
+        # Load best model at the end
         if self.best_model_state is not None:
             self.load_model(self.best_model_state)
 
@@ -128,7 +150,8 @@ class Network:
         self.set_training_mode(False)
         loss = self.compute_loss(X, y).data
         y_hat = self.predict(X)
-        accuracy = np.mean(
-            (y_hat.data >= 0.5) == (y.data if isinstance(y, Tensor) else y)
-        )
+
+        y_hat_np = y_hat.data.get()
+        y_np = np.array(y.data if isinstance(y, Tensor) else y)
+        accuracy = np.mean(y_hat_np.argmax(axis=1) == y_np.argmax(axis=1))
         return {"loss": loss, "accuracy": accuracy}, y_hat, y

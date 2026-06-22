@@ -34,7 +34,7 @@ training:
   batching:
     enabled: False
     method: standard
-    batch_size: 10000
+    batch_size: 2048
     drop_last: True
     shuffle: True
 
