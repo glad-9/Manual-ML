@@ -260,6 +260,7 @@ dependencies = [
     { name = "cupy-cuda13x" },
     { name = "idx2numpy" },
     { name = "matplotlib" },
+    { name = "matplotlib-backend-kitty" },
     { name = "numpy" },
     { name = "pandas" },
     { name = "pyyaml" },
@@ -270,6 +271,7 @@ requires-dist = [
     { name = "cupy-cuda13x", specifier = ">=14.1.1" },
     { name = "idx2numpy", specifier = ">=1.2.3" },
     { name = "matplotlib", specifier = ">=3.10.9" },
+    { name = "matplotlib-backend-kitty", specifier = ">=2.1.2" },
     { name = "numpy", specifier = ">=2.4.6" },
     { name = "pandas", specifier = ">=3.0.3" },
     { name = "pyyaml", specifier = ">=6.0.3" },
@@ -327,6 +329,18 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/67/b2/ef8d6bb59b0edb6c16c968b70f548aa13b54348972def5aa6ac85df67145/matplotlib-3.10.9-cp314-cp314t-musllinux_1_2_x86_64.whl", hash = "sha256:4e42042d54db34fda4e95a7bd3e5789c2a995d2dad3eb8850232ee534092fbbf", size = 9680884, upload-time = "2026-04-24T00:13:48.066Z" },
     { url = "https://files.pythonhosted.org/packages/61/1c/d21bfeb9931881ebe96bcfcff27c7ae4b160ae0ec291a714c42641a56d75/matplotlib-3.10.9-cp314-cp314t-win_amd64.whl", hash = "sha256:c27df8b3848f32a83d1767566595e43cfaa4460380974da06f4279a7ec143c39", size = 8432333, upload-time = "2026-04-24T00:13:51.008Z" },
     { url = "https://files.pythonhosted.org/packages/78/23/92493c3e6e1b635ccfff146f7b99e674808787915420373ac399283764c2/matplotlib-3.10.9-cp314-cp314t-win_arm64.whl", hash = "sha256:a49f1eadc84ca85fd72fa4e89e70e61bf86452df6f971af04b12c60761a0772c", size = 8324785, upload-time = "2026-04-24T00:13:53.633Z" },
+]
+
+[[package]]
+name = "matplotlib-backend-kitty"
+version = "2.1.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "matplotlib" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/d5/74/4fa3a53439fbc50eaf7fb5056cc68b98f31f67aeaff602236dd96652779e/matplotlib-backend-kitty-2.1.2.tar.gz", hash = "sha256:ab7d17ef00186c680a989af8c9be9fc8900a505f5c107dc7d9abc67b1a57f150", size = 6298, upload-time = "2023-01-23T17:00:17.208Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/1f/90/c1770c3443ae8ba4104db158df2d6a964394553b17bc195fdccd648685ce/matplotlib_backend_kitty-2.1.2-py3-none-any.whl", hash = "sha256:6f11f1b734d64df3712539833072be6dc66e4112320974bf614d2dff5dc2e8b5", size = 6733, upload-time = "2023-01-23T17:00:16.001Z" },
 ]
 
 [[package]]

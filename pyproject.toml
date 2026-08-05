@@ -8,6 +8,7 @@ dependencies = [
     "cupy-cuda13x>=14.1.1",
     "idx2numpy>=1.2.3",
     "matplotlib>=3.10.9",
+    "matplotlib-backend-kitty>=2.1.2",
     "numpy>=2.4.6",
     "pandas>=3.0.3",
     "pyyaml>=6.0.3",

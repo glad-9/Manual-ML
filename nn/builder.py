@@ -15,6 +15,8 @@ from nn.layers.conv.maxpool2d import MaxPool2D
 from nn.layers.regularization.dropout import Dropout
 from nn.layers.regularization.batchnorm import BatchNorm
 
+from nn.layers.recurrent.recurrent import Recurrent
+
 from nn.layers.activations.relu import ReLU
 from nn.layers.activations.sigmoid import Sigmoid
 from nn.layers.activations.tanh import Tanh
@@ -44,6 +46,7 @@ LAYERS = {
     "conv2d": Conv2D,
     "maxpool2d": MaxPool2D,
     "flatten": Flatten,
+    "recurrent": Recurrent,
     "relu": ReLU,
     "sigmoid": Sigmoid,
     "tanh": Tanh,
@@ -68,7 +71,8 @@ OPTIMIZERS = {
 def build_layer(layer_cfg, prev_size):
     layer_type = layer_cfg["type"]
 
-    if layer_type == "linear":
+    if layer_type == "linear" or layer_type == "recurrent":
+        layer_instance = LAYERS[layer_cfg.get("type")]
         initializer = INITIALIZERS[layer_cfg.get("initializer", "he")]()
         input_size = layer_cfg.get("input_size", None)
         layer = Linear(
