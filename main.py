@@ -53,21 +53,22 @@ def main():
         train_data=(X_train, y_train),
         val_data=(X_val, y_val),
         max_epochs=tc["max_epochs"],
-        patience=5,
+        patience=10,
+        target_val_loss=0.05,
         save_path="saved_models/mnist-conv.pkl",
     )
 
     results, y_hat, y_true = model.evaluate(X_test, y_test)
     print(
-        f"---------------------------\nFinal Costs:\nFinal Train Cost: {train_cost[-1]}\nFinal Best CV Cost: {model.best_val_loss}"
+        f"---------------------------\nFinal Loss:\nFinal Train Loss: {train_cost[-1]}\nFinal Best CV Cost: {model.best_val_loss}"
     )
     print(
-        f"---------------------------\nTest Set Results:\nTest Cost: {results['loss']}\nTest Accuracy: {results['accuracy']}"
+        f"---------------------------\nTest Set Results:\nTest Loss: {results['loss']}\nTest Accuracy: {results['accuracy']}"
     )
 
     plot_loss(train_cost, cv_cost)
 
-    plot_confusion_matrix(y_hat, y_true)
+    # plot_confusion_matrix(y_hat, y_true)
 
 
 if __name__ == "__main__":

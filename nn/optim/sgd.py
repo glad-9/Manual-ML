@@ -2,6 +2,13 @@ from .base import Optimizer
 
 
 class SGD(Optimizer):
+    """
+    Stochastic Gradient Descent (SGD) Optimizer
+
+    The most basic optimizer - simply updates the weights based on a fixed learning rate and
+    the current gradient.
+    """
+
     def __init__(self, **kwargs):
         """
         Initialize an SGD type Optimizer object

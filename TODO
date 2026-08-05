@@ -1,18 +1,21 @@
 Current Goals:
-- Docstrings for layer types and network
+- Robust Data processing
 - RNN Layer
-- Embedding Layer
+- ResNets
+- Docstrings for layer types and network
 
 Near-future:
-- Robust Data processing
-- Test out experiments on various datasets
+- Embedding Layer
 - GRU Layer
 - LSTM Layer
+- Feature Engineering
+- Test out experiments on various datasets
 
 Later:
-- Feature Engineering
 - Conv3D
 - ConvLSTMs
+
+Way Later:
 - Transformers
 
 Finished:

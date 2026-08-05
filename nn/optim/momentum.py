@@ -3,6 +3,21 @@ import cupy as cp
 
 
 class Momentum(Optimizer):
+    """
+    Momentum Optimizer
+
+    The momentum optimizer accelerates the optimization process in the correct direction.
+    Simulatesa heavy ball rolling around on the loss curve, gaining speed along consistent
+    slopes and ignoring random noise.
+
+    It maintains a running average of gradients for each parameter in a velocity vector.
+    Uses a momentum factor (beta, generally set to 0.9) to determine how much of m_prev is to
+    be retained. This results in better performance on loss curves consisting high oscillations,
+    local minima, or saddle points - the 'momentum' keeps the gradients stable,
+    allowing for faster convergence.
+
+    """
+
     def __init__(self, mf=0.9, **kwargs):
         """
         Initialize a Momentum type Optimizer object

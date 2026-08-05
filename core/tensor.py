@@ -4,11 +4,30 @@ from cupy.lib.stride_tricks import as_strided
 
 
 class Tensor:
+    """
+    A multi-dimensional array wrapper with automatic differentiation capabilities through a computation graph.
+
+    Attributes
+    ----------
+    data: cp.ndarray
+        The multi-dimensional array containing the tensor values
+    grad: ndarray or None
+        Gradient of loss with respect to this tensor. None until backward() is called
+    requires_grad : bool
+        True if gradients need to be calculated during backpropagation
+    requires_reg : bool
+        True if the tensor is flagged for weight decay optimization
+    op: str
+        String label for the operation that produced this tensor.
+    _prev : set
+        The parent tensors in the computation graph that this tensor was derived from
+    _backward : function
+        Internal closure that handles gradient accumulation for this specific node/Tensor
+    """
+
     def __init__(self, data, requires_grad=False, requires_reg=False):
         """
-        Initialize a Tensor object with data and gradient tracking capabilities.
-
-        Creates a Tensor that supports automatic differentiation through operations tracked in a computation graph.
+        Initialize a Tensor object.
 
         Parameters
         ----------
@@ -24,22 +43,6 @@ class Tensor:
             Flag used by an optimizer to determine whether a Tensor experiences weight decay
             Default is False
 
-        Attributes
-        ----------
-        data: cp.ndarray
-            The multi-dimensional array containing the tensor values
-        grad: ndarray or None
-            Gradient of loss with respect to this tensor. None until backward() is called
-        requires_grad : bool
-            True if gradients need to be calculated during backpropagation
-        requires_reg : bool
-            True if the tensor is flagged for weight decay optimization
-        op: str
-            String label for the operation that produced this tensor.
-        _prev : set
-            The parent tensors in the computation graph that this tensor was derived from
-        _backward : function
-            Internal closure that handles gradient accumulation for this specific node/Tensor
         """
         self.data = cp.asarray(data, dtype=cp.float32)
         self.grad = None
@@ -1001,7 +1004,7 @@ class Tensor:
                 ow[None, :, None, None] * stride + kw[None, None, None, :]
             )  # (1, w_out, 1, kW)
 
-            # cupyx's scatter_add handles the overlap correctly — no aliasing issues
+            # cupyx's scatter_add handles the overlap correctly
             # Index Tuple: (n, c, (h_out, w_out, kh, kw)) ~ grad_patches.shape
             scatter_add(grad, (slice(None), slice(None), r, c_idx), grad_patches)
 
@@ -1012,7 +1015,7 @@ class Tensor:
 
     def pool2d(self, pool_size=2, stride=None):
         """
-        Applies the max pooling operation on this tensor, reducing the size by choosing the maximum value within the given pool.
+        Applies the max pooling operation on this tensor, reducing the overall size by choosing the maximum value within the given pool.
 
         Parameters
         ----------
