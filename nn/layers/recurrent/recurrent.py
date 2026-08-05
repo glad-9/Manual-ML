@@ -62,15 +62,16 @@ class Recurrent(Layer):
         batch_size = X_t.shape[0]
         timestep = X_t.shape[1]
 
-        h_t = Tensor(np.zeros((batch_size, self.hidden_size)))
+        h_states = [Tensor(np.zeros((batch_size, self.hidden_size)))]
 
         for t in range(timestep):
             x_t = X_t[:, t, :]
             # x_t @ self.W_xh : (batch, input_size) @ (input_size, hidden_size) -> (batch, hidden_size)
             # h_prev @ self.W_hh : (batch, hidden_size) @ (hidden_size, hidden_size) -> (batch, hidden_size)
-            h_t = (x_t @ self.W_xh + h_t @ self.W_hh + self.b_h).tanh()
+            h_next = (x_t @ self.W_xh + h_states[-1] @ self.W_hh + self.b_h).tanh()
+            h_states.append(h_next)
 
-        return h_t
+        return h_states[-1]
 
     def get_params(self):
         """Return a list of trainable parameters."""
