@@ -3,9 +3,32 @@ import cupy as cp
 
 
 class Adam(Optimizer):
+    """
+    Adam (Adaptive Moment Estimation) Optimizer.
+
+    Adam is an adaptive learning rate optimization algorithm that computes individual adaptive learning rates for different parameters based on estimates of first and second moments of the gradients.
+    Excels in settings with noisy gradients or non-stationary objectives by combining the properties of both Momentum (smoothened gradients) and RMSprop (scales learning rate by gradient variance).
+
+    Attributes
+    ----------
+    mf : float
+        Used in calculating the first moment
+    dr : float
+        Used in calculating the second moment
+    momentum : python dict
+        Running average of gradients per parameter
+    velocity : python dict
+        Running average of squared gradients per parameter
+    t : int
+        Tracks the number of steps taken by the optimizer
+    epsilon : float
+        Small number to prevent division by zero
+        Set to 1e-8
+    """
+
     def __init__(self, mf=0.9, dr=0.99, **kwargs):
         """
-        Initializes an Adam type Optimizer object
+        Initializes an Adam Optimizer.
 
         Parameters
         ----------
@@ -21,27 +44,6 @@ class Adam(Optimizer):
 
         **kwargs
             Passed in Optimizer base class. See nn/optim/base.py
-
-        Attributes
-        ----------
-        mf : float
-            Used in calculating the first moment
-
-        dr : float
-            Used in calculating the second moment
-
-        momentum : python dict
-            Running average of gradients per parameter
-
-        velocity : python dict
-            Running average of squared gradients per parameter
-
-        t : int
-            Tracks the number of steps taken by the optimizer
-
-        epsilon : float
-            Small number to prevent division by zero
-            Set to 1e-8
         """
 
         super().__init__(**kwargs)

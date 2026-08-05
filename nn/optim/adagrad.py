@@ -3,6 +3,15 @@ import cupy as cp
 
 
 class Adagrad(Optimizer):
+    """
+    AdaGrad (Adaptive Gradient Algorithm) Optimizer.
+
+    Adagrad uses an adaptive, per-parameter learning rate instead of a single, fixed learning
+    rate for all parameters.
+    Uses a running accumulation of gradient variances per parameters to determine the learning rate.
+
+    """
+
     def __init__(self, **kwargs):
         """
         Initializes an Adagrad type Optimizer object

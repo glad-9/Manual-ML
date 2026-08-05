@@ -3,25 +3,37 @@ import cupy as cp
 
 
 class RMSprop(Optimizer):
-    def __init__(self, dr=0.99, **kwargs):
+    """
+    RMSprop Optimizer.
+
+    Designed to fix the issues of the Adagrad algorithm.
+    It adds a decay rate to the equation which acts as a forgetting factor (beta, usually set to 0.9).
+    Scales learning rate based on the gradient variance and adapts to change as a result of
+    the decay rate which lets older gradients decay while giving more weight to recent ones.
+    Because of the decay rate, the denominator in RMSprop (v_next) does not grow forever,
+    solving the problem of radically diminishing or exploding learning rates during training.
+
+    Attributes
+    ----------
+    dr : float
+        Used in calculating the second moment - v_next
+    sq_grads : python dict
+        Maintains a running average of squared gradients
+    """
+
+    def __init__(self, dr=0.9, **kwargs):
         """
-        Initializes a RMSprop type Optimizer object
+        Initializes an RMSprop Optimizer.
 
         Parameters
         ----------
         dr : float
             Decay Rate: Controls how much weight the optimizer gives to recent gradients compared to older gradients when dynamically scaling the learning rate
-            Default is 0.99
+            Default is 0.9
 
         **kwargs
             Passed to Optimizer base class. See nn/optim/base.py
 
-        Attributes
-        ----------
-        dr : float
-            Used in calculating the second moment - v_next
-        sq_grads : python dict
-            Maintains a running average of squared gradients
         """
         super().__init__(**kwargs)
 
