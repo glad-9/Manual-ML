@@ -77,14 +77,14 @@ class Network:
             print(
                 f"Epoch: {epoch}\n"
                 f"Full Train Loss: {total_train_loss}\n"
-                f"Batch Train Loss: {epoch_losses[-1] if epoch_losses else 'NA'}"
+                f"Batch Train Loss: {epoch_losses[-1] if batching else 'NA'}"
             )
 
             if val_data is not None:
                 X_val, y_val = val_data
                 total_val_loss = self.compute_loss(X_val, y_val).data.get()
                 val_history.append(total_val_loss)
-                print(f"Val Cost: {total_val_loss}")
+                print(f"Val Cost: {total_val_loss}\n")
 
                 if total_val_loss < self.best_val_loss:
                     self.best_val_loss = total_val_loss
