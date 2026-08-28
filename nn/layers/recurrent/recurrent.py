@@ -8,13 +8,23 @@ class Recurrent(Layer):
     """
     Recurrent Layer.
 
+    Recurrent layers process sequential data (text, time series, audio) by
+    maintaining a hidden state that acts as short-term memory. At each state,
+    the layer takes a new input and combines it with the previous hidden state,
+    passing updated context forward through time.
+
     Attributes
     ----------
     input_size : int
+        Number of features for a given timestep (e.g: 300-dimensional word embeddings per word in a sentence).
     hidden_size : int
+        Size of the recurrent layer.
     W_xh : Tensor
+        Weights that map a current timestep into the hidden space.
     W_hh : Tensor
+        Weights that transform the previous hidden states before adding to the new input.
     b_h : Tensor
+        Bias added to sum of the transformed input.
     """
 
     def __init__(self, input_size, hidden_size, initializer):
@@ -24,6 +34,7 @@ class Recurrent(Layer):
         Parameters
         ----------
         input_size : int
+            Size of features for a given timestep.
         hidden_size : int
             Size of the recurrent layer.
         initializer : `Initializer`
@@ -56,7 +67,17 @@ class Recurrent(Layer):
         Returns
         -------
         Tensor
-            ...
+            The final hidden state vector of shape '(batch_size, hidden_size)'
+
+        Notes
+        -----
+        The forward unrolls the recurrent cell across all timesteps.
+        At each timestep t, the hidden state is computed via:
+            h_t = tanh(X_t @ W_xh + h_(t-1) @ W_hh)
+
+        This layer implements a Many-toOne configuration by returning only fhe final hidden_stat
+        h_t after processing the whole sequence.
+
         """
         X_t = X if isinstance(X, Tensor) else Tensor(X)
         batch_size = X_t.shape[0]
