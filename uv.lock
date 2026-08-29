@@ -223,7 +223,7 @@ wheels = [
 ]
 
 [[package]]
-name = "manual-ml"
+name = "numtorch"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
