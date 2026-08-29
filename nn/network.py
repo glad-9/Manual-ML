@@ -4,6 +4,7 @@ import pickle
 
 from nn.layers.base import Layer
 from core.tensor import Tensor
+from core.backend import to_cpu
 
 
 class Network:
@@ -71,7 +72,7 @@ class Network:
                 epoch_losses.append(batch_cost)
 
             self.set_training_mode(False)
-            total_train_loss = self.compute_loss(X_train, y_train).data.get()
+            total_train_loss = to_cpu(self.compute_loss(X_train, y_train).data)
             train_history.append(total_train_loss)
 
             print(
@@ -82,7 +83,7 @@ class Network:
 
             if val_data is not None:
                 X_val, y_val = val_data
-                total_val_loss = self.compute_loss(X_val, y_val).data.get()
+                total_val_loss = to_cpu(self.compute_loss(X_val, y_val).data)
                 val_history.append(total_val_loss)
                 print(f"Val Cost: {total_val_loss}\n")
 
@@ -144,7 +145,7 @@ class Network:
         loss = self.compute_loss(X, y).data
         y_hat = self.predict(X)
 
-        y_hat_np = y_hat.data.get()
+        y_hat_np = to_cpu(y_hat.data)
         y_np = np.array(y.data if isinstance(y, Tensor) else y)
         accuracy = np.mean(y_hat_np.argmax(axis=1) == y_np.argmax(axis=1))
         return {"loss": loss, "accuracy": accuracy}, y_hat, y

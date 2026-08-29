@@ -1,5 +1,7 @@
 from .base import Optimizer
-import cupy as cp
+from core.backend import xp
+
+assert xp is not None
 
 
 class Adam(Optimizer):
@@ -88,12 +90,12 @@ class Adam(Optimizer):
                     p.grad += self.reg * p.data
 
                 key = id(p)
-                grad = cp.clip(p.grad, -5, 5)
+                grad = xp.clip(p.grad, -5, 5)
 
                 # First moment estimate
 
                 if key not in self.momentum:
-                    self.momentum[key] = cp.zeros_like(p.data)
+                    self.momentum[key] = xp.zeros_like(p.data)
 
                 m_prev = self.momentum[key]
 
@@ -103,7 +105,7 @@ class Adam(Optimizer):
 
                 # Second moment estimate
                 if key not in self.velocity:
-                    self.velocity[key] = cp.zeros_like(p.data)
+                    self.velocity[key] = xp.zeros_like(p.data)
 
                 v_prev = self.velocity[key]
 
@@ -116,6 +118,6 @@ class Adam(Optimizer):
                 v_corrected = v_raw / (1 - self.dr**self.t)
 
                 p.data -= (self.lr * m_corrected) / (
-                    cp.sqrt(v_corrected) + self.epsilon
+                    xp.sqrt(v_corrected) + self.epsilon
                 )
                 p.zero_grad()

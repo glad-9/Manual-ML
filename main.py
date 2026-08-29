@@ -1,6 +1,6 @@
 import yaml
 
-from cli.mnist_mlp import run_mnist_mlp
+from tests.mnist_mlp import run_mnist_mlp
 
 from data_processing.tabular.tabularpipeline import TabularPipeline
 from data_processing.image.imagepipeline import ImagePipeline
@@ -11,35 +11,35 @@ from nn.builder import build_network
 
 
 def main():
-    config_path = "experiments/mnist-conv/mnist-conv.yaml"
-    # config_path = "experiments/mnist-mlp/mnist-mlp.yaml"
+    # config_path = "experiments/mnist-conv/mnist-conv.yaml"
+    config_path = "experiments/mnist-mlp/mnist-mlp.yaml"
 
     with open(config_path) as f:
         config = yaml.safe_load(f)
 
     dc = config["dataset"]
 
-    # pipeline = TabularPipeline(
-    #     path=dc["path"],
-    #     target_column=dc["label"],
-    #     categorical_columns=dc["categorical"],
-    #     drop_columns=dc["drop"],
-    #     train_ratio=dc["train_ratio"],
-    #     val_ratio=dc["val_ratio"],
-    #     normalize=dc["normalize"],
-    # )
-
-    pipeline = ImagePipeline(
-        images_path=dc["images_path"],
-        labels_path=dc["labels_path"],
+    pipeline = TabularPipeline(
+        path=dc["path"],
+        target_column=dc["label"],
+        categorical_columns=dc["categorical"],
+        drop_columns=dc["drop"],
         train_ratio=dc["train_ratio"],
         val_ratio=dc["val_ratio"],
         normalize=dc["normalize"],
     )
 
-    subsets = pipeline.run(idx=True, one_hot=True)
+    # pipeline = ImagePipeline(
+    #     images_path=dc["images_path"],
+    #     labels_path=dc["labels_path"],
+    #     train_ratio=dc["train_ratio"],
+    #     val_ratio=dc["val_ratio"],
+    #     normalize=dc["normalize"],
+    # )
+    #
+    # subsets = pipeline.run(idx=True, one_hot=True)
 
-    # subsets = run_mnist_mlp()
+    subsets = run_mnist_mlp()
 
     X_train, y_train = subsets["train"].get_all()
     X_val, y_val = subsets["cv"].get_all()
@@ -55,7 +55,6 @@ def main():
         max_epochs=tc["max_epochs"],
         patience=10,
         target_val_loss=0.05,
-        save_path="saved_models/mnist-conv.pkl",
     )
 
     results, y_hat, y_true = model.evaluate(X_test, y_test)

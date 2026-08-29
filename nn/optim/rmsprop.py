@@ -1,5 +1,7 @@
 from .base import Optimizer
-import cupy as cp
+from core.backend import xp
+
+assert xp is not None
 
 
 class RMSprop(Optimizer):
@@ -65,15 +67,15 @@ class RMSprop(Optimizer):
                 if p.requires_reg:
                     p.grad += self.reg * p.data
 
-                grad = cp.clip(p.grad, -5, 5)
+                grad = xp.clip(p.grad, -5, 5)
 
                 if key not in self.sq_grads:
-                    self.sq_grads[key] = cp.zeros_like(p.data)
+                    self.sq_grads[key] = xp.zeros_like(p.data)
 
                 v_prev = self.sq_grads[key]
 
                 v_next = (self.dr * v_prev) + (1 - self.dr) * (grad**2)
 
                 self.sq_grads[key] = v_next
-                p.data -= (self.lr * grad) / cp.sqrt(v_next + self.epsilon)
+                p.data -= (self.lr * grad) / xp.sqrt(v_next + self.epsilon)
                 p.zero_grad()

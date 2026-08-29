@@ -9,15 +9,21 @@ dataset:
 
 layers:
   - type: linear
-    output_size: 24
+    output_size: 784
+  - type: relu
+  - type: dropout
+    rate: 0.0
+
+  - type: linear
+    output_size: 512
   - type: relu
   - type: dropout
     rate: 0.2
+
   - type: linear
-    output_size: 16
+    output_size: 128
   - type: relu
-  - type: dropout
-    rate: 0.1
+
   - type: linear
     output_size: 10
     initializer: xavier
@@ -25,17 +31,17 @@ layers:
 
 training:
   loss: ce
-  max_epochs: 1000
+  max_epochs: 10
 
   optimizer:
     type: adam
-    lr: 0.0005
+    lr: 0.001
     reg: 0.001
 
   batching:
-    enabled: False
+    enabled: True
     method: standard
-    batch_size: 2048
+    batch_size: 256
     drop_last: True
     shuffle: True
 

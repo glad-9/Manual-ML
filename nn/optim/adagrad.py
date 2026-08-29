@@ -1,5 +1,7 @@
 from .base import Optimizer
-import cupy as cp
+from core.backend import xp
+
+assert xp is not None
 
 
 class Adagrad(Optimizer):
@@ -61,11 +63,11 @@ class Adagrad(Optimizer):
                 if p.requires_reg:
                     p.grad += self.reg * p.data
 
-                grad = cp.clip(p.grad, -5, 5)
+                grad = xp.clip(p.grad, -5, 5)
 
                 if key not in self.sq_grads:
-                    self.sq_grads[key] = cp.zeros_like(p.data)
+                    self.sq_grads[key] = xp.zeros_like(p.data)
 
                 self.sq_grads[key] += grad**2
-                p.data -= (self.lr * grad) / cp.sqrt(self.sq_grads[key] + self.epsilon)
+                p.data -= (self.lr * grad) / xp.sqrt(self.sq_grads[key] + self.epsilon)
                 p.zero_grad()

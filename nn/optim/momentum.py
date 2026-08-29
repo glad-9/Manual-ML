@@ -1,5 +1,7 @@
 from .base import Optimizer
-import cupy as cp
+from core.backend import xp
+
+assert xp is not None
 
 
 class Momentum(Optimizer):
@@ -70,10 +72,10 @@ class Momentum(Optimizer):
                 if p.requires_reg:
                     p.grad += self.reg * p.data
 
-                grad = cp.clip(p.grad, -5, 5)
+                grad = xp.clip(p.grad, -5, 5)
 
                 if key not in self.momentum:
-                    self.momentum[key] = cp.zeros_like(p.data)
+                    self.momentum[key] = xp.zeros_like(p.data)
 
                 m_prev = self.momentum[key]
 

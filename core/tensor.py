@@ -1,6 +1,6 @@
-import cupy as cp
-from cupyx import scatter_add
-from cupy.lib.stride_tricks import as_strided
+from core.backend import xp
+from core.backend import scatter_add
+from core.backend import as_strided
 
 
 class Tensor:
@@ -9,7 +9,7 @@ class Tensor:
 
     Attributes
     ----------
-    data: cp.ndarray
+    data: xp.ndarray
         The multi-dimensional array containing the tensor values
     grad: ndarray or None
         Gradient of loss with respect to this tensor. None until backward() is called
@@ -44,7 +44,7 @@ class Tensor:
             Default is False
 
         """
-        self.data = cp.asarray(data, dtype=cp.float32)
+        self.data = xp.asarray(data, dtype=xp.float32)
         self.grad = None
         self.requires_grad = requires_grad
         self.requires_reg = requires_reg
@@ -67,7 +67,7 @@ class Tensor:
         Notes
         -----
         This method must be called on the scalar output of a loss function.
-        It initializes the root gradient as an array of ones ('cp.ones_like') then traverses the graph in reverse topological order, calling the node/Tensor's internal '_backward()' closure to propagate derivatives.
+        It initializes the root gradient as an array of ones ('xp.ones_like') then traverses the graph in reverse topological order, calling the node/Tensor's internal '_backward()' closure to propagate derivatives.
         """
         topo = []
         visited = set()
@@ -81,7 +81,7 @@ class Tensor:
                 topo.append(node)
 
         build_topo(self)
-        self.grad = cp.ones_like(self.data)
+        self.grad = xp.ones_like(self.data)
         for node in reversed(topo):
             if not node.requires_grad:
                 continue
@@ -120,7 +120,7 @@ class Tensor:
 
         def _backward():
             # Create a zero array matching the parent's shape
-            full_grad = cp.zeros_like(self.data)
+            full_grad = xp.zeros_like(self.data)
 
             # Route the sliced upstream gradient into its original index position
             full_grad[idx] = out.grad
@@ -148,7 +148,7 @@ class Tensor:
         grad = self._unbroadcast(grad)
 
         if self.grad is None:
-            self.grad = cp.zeros_like(self.data).astype("float32")
+            self.grad = xp.zeros_like(self.data).astype("float32")
 
         self.grad += grad
         assert self.grad.shape == self.data.shape
@@ -159,7 +159,7 @@ class Tensor:
 
         Parameters
         ----------
-        data : cp.ndarray
+        data : xp.ndarray
             Computed data of the operation/method
 
         *parents : tuple of Tensor
@@ -183,12 +183,12 @@ class Tensor:
 
         Parameters
         ----------
-        grad : cp.ndarray
+        grad : xp.ndarray
             The gradient in its (potentially) expanded/broadcasted shape.
 
         Returns
         -------
-        cp.ndarray
+        xp.ndarray
             The gradient reshaped and summed to match shape.
 
         Notes
@@ -263,7 +263,7 @@ class Tensor:
         b:[1. 1. 1.]
         c:[1. 1. 1.]
         """
-        other = other if isinstance(other, Tensor) else Tensor(cp.array(other))
+        other = other if isinstance(other, Tensor) else Tensor(xp.array(other))
         op = self.data + other.data
         out = self._create_results(op, self, other)
         out.op = "add"
@@ -317,7 +317,7 @@ class Tensor:
         b:[1. 2. 3.]
         c:[1. 1. 1.]
         """
-        other = other if isinstance(other, Tensor) else Tensor(cp.array(other))
+        other = other if isinstance(other, Tensor) else Tensor(xp.array(other))
         op = self.data * other.data
         out = self._create_results(op, self, other)
 
@@ -402,7 +402,7 @@ class Tensor:
             d/dy (x ** y) = ln(x) * (x ** y)
 
         - Gradient w.r.t self: out.grad * (other.data) * (self.data ** (other.data - 1))
-        - Gradient w.r.t other: out.grad * cp.log(self.data) * (self.data ** other.data)
+        - Gradient w.r.t other: out.grad * xp.log(self.data) * (self.data ** other.data)
 
         Broadcasting: Supports NumPy broadcasting rules. For gradient reduction following broadcasting, see _unbroadcast
 
@@ -420,7 +420,7 @@ class Tensor:
         b:None
         c:[[1.] [1.] [1.] [1.]]
         """
-        other = other if isinstance(other, Tensor) else Tensor(cp.array(other))
+        other = other if isinstance(other, Tensor) else Tensor(xp.array(other))
         op = self.data**other.data
         out = self._create_results(op, self, other)
 
@@ -430,7 +430,7 @@ class Tensor:
             self._accumulate_grad(
                 other.data * (self.data ** (other.data - 1)) * out.grad
             )
-            other._accumulate_grad(cp.log(self.data) * op * out.grad)
+            other._accumulate_grad(xp.log(self.data) * op * out.grad)
 
         out._backward = _backward
         return out
@@ -508,7 +508,7 @@ class Tensor:
         mul : The primary implementation of element-wise multiplication
         pow : The primary implementation of element-wise power
         """
-        other = other if isinstance(other, Tensor) else Tensor(cp.array(other))
+        other = other if isinstance(other, Tensor) else Tensor(xp.array(other))
         return self * (other**-1.0)
 
     def __radd__(self, other):
@@ -578,7 +578,7 @@ class Tensor:
         --------
         sub : The primary implementation of element-wise subtraction
         """
-        other = other if isinstance(other, Tensor) else Tensor(cp.array(other))
+        other = other if isinstance(other, Tensor) else Tensor(xp.array(other))
         return other + (-self)
 
     def __rtruediv__(self, other):
@@ -602,7 +602,7 @@ class Tensor:
         --------
         truediv : The primary implementation of element-wise division.
         """
-        other = other if isinstance(other, Tensor) else Tensor(cp.array(other))
+        other = other if isinstance(other, Tensor) else Tensor(xp.array(other))
         return other * (self**-1.0)
 
     def reshape(self, *shape):
@@ -654,7 +654,7 @@ class Tensor:
         Forward Pass: Rearranges axes using self.data.transpose(axes)
         Backward Pass:
         The backward pass must undo the forward shuffling. This requires calculating the inverse permutation of the forward 'axes' vector.
-        Using 'cp.argsort' on the forward axes generates the exact tracking map to restore the upstream gradient back to the tensor's original shape
+        Using 'xp.argsort' on the forward axes generates the exact tracking map to restore the upstream gradient back to the tensor's original shape
         """
         op = self.data.transpose(axes)
         out = self._create_results(op, self)
@@ -663,7 +663,7 @@ class Tensor:
         def _backward():
             assert out.grad is not None
             # Convert CuPy argsort array to a Python tuple before transposing - GPU-bound array -> CPU integer args
-            axes_order = tuple(cp.argsort(cp.array(axes)).tolist())
+            axes_order = tuple(xp.argsort(xp.array(axes)).tolist())
             self._accumulate_grad(out.grad.transpose(axes_order))
 
         out._backward = _backward
@@ -688,11 +688,11 @@ class Tensor:
 
         Notes
         -----
-        Forward Pass (using NumPy/CuPy's clip): cp.clip(self.data, min_val, max_val)
+        Forward Pass (using NumPy/CuPy's clip): xp.clip(self.data, min_val, max_val)
         Backward Pass:
         Creates a mask array where elements in self.data that are between min_val and max_val are backpropagated and the rest are zero.
         """
-        op = cp.clip(self.data, min_val, max_val)
+        op = xp.clip(self.data, min_val, max_val)
         out = self._create_results(op, self)
 
         def _backward():
@@ -714,7 +714,7 @@ class Tensor:
 
         Notes
         -----
-        Forward Pass: cp.log(self.data)
+        Forward Pass: xp.log(self.data)
         Backward Pass:
         Using the derivative of the natural log we have,
         d/dx (ln(x)) = 1 / x
@@ -723,12 +723,12 @@ class Tensor:
 
         Broadcasting: Supports NumPy broadcasting rules. For gradient reduction following broadcasting, see _unbroadcast
         """
-        op = cp.log(self.data)
+        op = xp.log(self.data)
         out = self._create_results(op, self)
         out.op = "log"
 
         def _backward():
-            self._accumulate_grad(cp.reciprocal(self.data) * out.grad)
+            self._accumulate_grad(xp.reciprocal(self.data) * out.grad)
 
         out._backward = _backward
         return out
@@ -744,16 +744,16 @@ class Tensor:
 
         Notes
         -----
-        Forward Pass: cp.exp(self.data)
+        Forward Pass: xp.exp(self.data)
         Backward Pass:
         Using the derivative of e ** x,
         d/dx (e ** x) = x * (e ** x)
 
-        - Gradient w.r.t self: (cp.exp(self.data)) * out.grad
+        - Gradient w.r.t self: (xp.exp(self.data)) * out.grad
 
         Broadcasting: Supports NumPy broadcasting rules. For gradient reduction following broadcasting, see _unbroadcast
         """
-        op = cp.exp(self.data)
+        op = xp.exp(self.data)
         out = self._create_results(op, self)
         out.op = "exp"
 
@@ -781,27 +781,27 @@ class Tensor:
 
         Notes
         -----
-        Forward Pass: Sums across axes with cp.sum(self.data, axis=axis, keepdims=keepdims)
+        Forward Pass: Sums across axes with xp.sum(self.data, axis=axis, keepdims=keepdims)
         Backward Pass:
             Every element of self contributed equally (with coefficient 1) to the sum
             so the upstream gradient is broadcast back unchanged to every position that was
             summed over.
 
-            - Gradient w.r.t self: cp.ones_like(self.data) * out.grad
+            - Gradient w.r.t self: xp.ones_like(self.data) * out.grad
 
         Broadcasting: ---
 
         """
         op = (
-            cp.sum(self.data)
+            xp.sum(self.data)
             if axis is None
-            else cp.sum(self.data, axis=axis, keepdims=keepdims)
+            else xp.sum(self.data, axis=axis, keepdims=keepdims)
         )
         out = self._create_results(op, self)
         out.op = "sum"
 
         def _backward():
-            self._accumulate_grad(cp.ones_like(self.data) * out.grad)
+            self._accumulate_grad(xp.ones_like(self.data) * out.grad)
 
         out._backward = _backward
         return out
@@ -919,7 +919,7 @@ class Tensor:
             Slices out.grad to access only self.data, ignoring the padding.
         """
         n, c, h, w = self.data.shape
-        padded = cp.zeros((n, c, h + (2 * p), w + (2 * p)), dtype=self.data.dtype)
+        padded = xp.zeros((n, c, h + (2 * p), w + (2 * p)), dtype=self.data.dtype)
         padded[:, :, p : p + h, p : p + w] = self.data
         out = self._create_results(padded, self)
 
@@ -980,7 +980,7 @@ class Tensor:
 
         def _backward():
             assert out.grad is not None
-            grad = cp.zeros_like(self.data)
+            grad = xp.zeros_like(self.data)
 
             # grad shape: (n, h_out * w_out, c * kH * kW)
             # reversing the reshape done in the forward pass to allow transposing to the desired shape -
@@ -991,10 +991,10 @@ class Tensor:
 
             # Build explicit index arrays for where each patch-element lands in the input
             # r_offsets[oh, kh] = kh + oh * stride  (the input row this (kh, oh) pair maps to)
-            oh = cp.arange(h_out)
-            kh = cp.arange(kH)
-            ow = cp.arange(w_out)
-            kw = cp.arange(kW)
+            oh = xp.arange(h_out)
+            kh = xp.arange(kH)
+            ow = xp.arange(w_out)
+            kw = xp.arange(kW)
 
             # Broadcast to get every (kh, kw, oh, ow) combination
             r = (
@@ -1034,7 +1034,7 @@ class Tensor:
         Notes
         -----
         Forward Pass:
-            Constructs a 6D view of the input using as_strided(), shaped (n, h_out, w_out, c, kh, kw). The view does not copy data - it reinterprets the same underlying buffer by reading it with different strides, so overlapping patches share memory rather than duplicating it. cp.max() then reduces over the last two axes (the pooling window), leaving one max per value (n, c, oh, ow) window.
+            Constructs a 6D view of the input using as_strided(), shaped (n, h_out, w_out, c, kh, kw). The view does not copy data - it reinterprets the same underlying buffer by reading it with different strides, so overlapping patches share memory rather than duplicating it. xp.max() then reduces over the last two axes (the pooling window), leaving one max per value (n, c, oh, ow) window.
 
         Backward Pass:
             Only the maximum element of each window contributed to the forward output, so only that element should receive gradients; every other position in the window receives a zero.
@@ -1063,13 +1063,13 @@ class Tensor:
         )
 
         # Forward: max over the pooling window axes (4, 5) - (pool_size, pool_size)
-        out_data = cp.max(strided, axis=(4, 5))
+        out_data = xp.max(strided, axis=(4, 5))
         out = self._create_results(out_data, self)
         out.op = "pool2d"
 
         def _backward():
             assert out.grad is not None
-            grad = cp.zeros_like(self.data)
+            grad = xp.zeros_like(self.data)
 
             # Create the mask
             mask = strided == out_data[:, :, :, :, None, None]
@@ -1078,9 +1078,9 @@ class Tensor:
             grad_expanded = out.grad[:, :, :, :, None, None] * mask
 
             # Build index arrays for where each pool element lands in the input
-            oh = cp.arange(h_out)
-            ow = cp.arange(w_out)
-            p = cp.arange(pool_size)
+            oh = xp.arange(h_out)
+            ow = xp.arange(w_out)
+            p = xp.arange(pool_size)
 
             # (h_out, pool_size) → input row indices
             r = (
@@ -1111,14 +1111,14 @@ class Tensor:
 
         Notes
         -----
-        Forward pass: Computes cp.maximum(0, self.data)
+        Forward pass: Computes xp.maximum(0, self.data)
 
         Backward pass:
         Gradient is passed back only for elements where input > 0.
         For elements where input <= 0, gradient is zeroed.
 
         """
-        op = cp.maximum(0, self.data)
+        op = xp.maximum(0, self.data)
         out = self._create_results(op, self)
 
         def _backward():
@@ -1151,7 +1151,7 @@ class Tensor:
         - Gradient w.r.t self: out.grad * (op * (1 - op))
         """
         x = self.data
-        op = cp.where(x >= 0, 1.0 / (1.0 - cp.exp(-x)), 1.0 / (1.0 - cp.exp(x)))
+        op = xp.where(x >= 0, 1.0 / (1.0 - xp.exp(-x)), 1.0 / (1.0 - xp.exp(x)))
         out = self._create_results(op, self)
         out.op = "sigmoid"
 
@@ -1186,7 +1186,7 @@ class Tensor:
 
         - Gradient w.r.t to self: out.grad * 1 - (op ** 2)
         """
-        op = cp.tanh(self.data)
+        op = xp.tanh(self.data)
         out = self._create_results(op, self)
         out.op = "tanh"
 
