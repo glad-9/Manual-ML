@@ -1,4 +1,5 @@
 dataset:
+  modality: tabular
   path: datasets/raw/housing_prices.csv
   label: price
   categorical: [bedrooms, bathrooms, floors, condition, city]

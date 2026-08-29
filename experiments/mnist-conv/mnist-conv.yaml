@@ -1,4 +1,5 @@
 dataset:
+  modality: image
   images_path: datasets/raw/mnist/train-images.idx3-ubyte
   labels_path: datasets/raw/mnist/train-labels.idx1-ubyte
   train_ratio: 0.8

@@ -1,4 +1,5 @@
 dataset:
+  modality: tabular
   path: datasets/raw/diabetes.csv
   label: Outcome
   categorical: []
