@@ -1,9 +1,10 @@
 import yaml
 
-from tests.mnist_mlp import run_mnist_mlp
+from cli.args import parse_args
 
 from data_processing.tabular.tabularpipeline import TabularPipeline
 from data_processing.image.imagepipeline import ImagePipeline
+
 from viz.training import plot_loss
 from viz.evaluation import plot_confusion_matrix
 
@@ -11,50 +12,61 @@ from nn.builder import build_network
 
 
 def main():
-    # config_path = "experiments/mnist-conv/mnist-conv.yaml"
-    config_path = "experiments/mnist-mlp/mnist-mlp.yaml"
+    args = parse_args()
+    assert args is not None
 
-    with open(config_path) as f:
+    with open(args.config) as f:
         config = yaml.safe_load(f)
 
     dc = config["dataset"]
 
-    pipeline = TabularPipeline(
-        path=dc["path"],
-        target_column=dc["label"],
-        categorical_columns=dc["categorical"],
-        drop_columns=dc["drop"],
-        train_ratio=dc["train_ratio"],
-        val_ratio=dc["val_ratio"],
-        normalize=dc["normalize"],
-    )
+    if dc["modality"] == "tabular":
+        if args.dataset:
+            dc["path"] = args.dataset
 
-    # pipeline = ImagePipeline(
-    #     images_path=dc["images_path"],
-    #     labels_path=dc["labels_path"],
-    #     train_ratio=dc["train_ratio"],
-    #     val_ratio=dc["val_ratio"],
-    #     normalize=dc["normalize"],
-    # )
-    #
-    # subsets = pipeline.run(idx=True, one_hot=True)
+        pipeline = TabularPipeline(
+            path=dc["path"],
+            target_column=dc["label"],
+            categorical_columns=dc["categorical"],
+            drop_columns=dc["drop"],
+            train_ratio=dc["train_ratio"],
+            val_ratio=dc["val_ratio"],
+            normalize=dc["normalize"],
+        )
+        subsets = pipeline.run()
 
-    subsets = run_mnist_mlp()
+    elif dc["modality"] == "image":
+        if args.dataset:
+            dc["images_path"] = args.dataset
+        if args.labels:
+            dc["labels_path"] = args.labels
+
+        pipeline = ImagePipeline(
+            images_path=dc["images_path"],
+            labels_path=dc["labels_path"],
+            train_ratio=dc["train_ratio"],
+            val_ratio=dc["val_ratio"],
+            normalize=dc["normalize"],
+        )
+        subsets = pipeline.run(idx=True, one_hot=True)
 
     X_train, y_train = subsets["train"].get_all()
     X_val, y_val = subsets["cv"].get_all()
     X_test, y_test = subsets["test"].get_all()
 
     feature_count = X_train.shape[1]  # (samples, features)
-    model = build_network(config_path, feature_count)
+    model = build_network(args.config, feature_count)
 
     tc = config["training"]
+    save_path = args.save_path
+
     train_cost, cv_cost = model.fit(
         train_data=(X_train, y_train),
         val_data=(X_val, y_val),
         max_epochs=tc["max_epochs"],
         patience=10,
         target_val_loss=0.05,
+        save_path=save_path,
     )
 
     results, y_hat, y_true = model.evaluate(X_test, y_test)
