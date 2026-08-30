@@ -2,6 +2,8 @@ from core.backend import xp
 from core.backend import scatter_add
 from core.backend import as_strided
 
+assert xp is not None
+
 
 class Tensor:
     """
